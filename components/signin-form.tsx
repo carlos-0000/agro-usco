@@ -19,19 +19,19 @@ const SignInForm = () => {
         })
 
         if (!signInResult?.ok) {
-            return toast.error("Well it din't work, please try again")
+            return toast.error('Parece que algo salió mal, por favor inténtalo de nuevo')
         }
 
-        return toast.success("Check your email for the magic link")
+        return toast.success('Revisa tu correo electrónico para el enlace mágico')
     }
 
     return (
         <form action={signInWithEmail}>
             <div className="flex flex-col gap-y-2">
-                <Label>Email</Label>
+                <Label>Correo electrónico</Label>
                 <Input onChange={(e) => setEmail(e.target.value)} name="email" type="email" placeholder="name@example.com" />
             </div>
-            <Button type="submit" className="mt-4 w-full">Sign in with Email</Button>
+            <Button type="submit" className="mt-4 w-full">Continuar</Button>
         </form>
     )
 }

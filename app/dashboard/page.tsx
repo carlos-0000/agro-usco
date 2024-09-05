@@ -3,12 +3,13 @@ import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 
 export default async function Home() {
+    // @ts-ignore
     const session = await getServerSession(authOptions)
     const user = session?.user
     console.log(session?.user)
     return (
         <div className='mt-20 text-2xl font-bold m-20'>
-           Welcome {user?.name}! Move to {<Link href="/dashboard/settings" className='text-blue-500 underline'>settings</Link>} to register a new passkey.
+           Bienvenido {user?.email}! Ir a {<Link href="/dashboard/settings" className='text-blue-500 underline'>configuraciones</Link>} para registrar una nueva passkey.
         </div>
     )
 }

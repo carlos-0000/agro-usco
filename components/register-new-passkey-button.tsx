@@ -20,7 +20,7 @@ const RegisterNewPasskey = () => {
             className="flex justify-center items-center space-x-2"
         >
             <Passkey className="w-4 h-4 mr-2" />
-            Register a new passkey
+            Registrar una nueva passkey
         </Button>
     )
 }

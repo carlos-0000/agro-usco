@@ -8,13 +8,14 @@ export default async function DashboardLayout({
 }: {
     children: React.ReactNode
 }) {
+    // @ts-ignore
     const session = await getServerSession(authOptions)
     const user = session?.user
     return (
         <div>
             <header className='flex justify-between items-center p-6 px-12 border-b'>
                 <div>
-                    <p className="text-2xl font-bold">Hanko</p>
+                    <p className="text-2xl font-bold">Mercado Agro</p>
                 </div>
                 <UserAccountNav
                     user={{

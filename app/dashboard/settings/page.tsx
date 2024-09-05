@@ -5,9 +5,9 @@ const Settings = () => {
         <div className="p-10 rounded-lg border border-muted mt-10 m-20">
             <div className="space-y-6">
                 <div className="space-y-3">
-                    <h2 className="text-xl font-medium">Register a passkey</h2>
+                    <h2 className="text-xl font-medium">Registrar una passkey</h2>
                     <p className="text-sm text-secondary-foreground mt-3">
-                        Register a passkey to make logging in a breeze.
+                        Registra una passkey para hacer el inicio de sesión más fácil.
                     </p>
                 </div>
                 <RegisterNewPasskey />

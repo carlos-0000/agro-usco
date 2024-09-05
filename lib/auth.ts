@@ -9,13 +9,9 @@ import {
 
 import prisma from "./db";
 
+
 export const authOptions = {
   providers: [
-    GitHubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET_ID!,
-      allowDangerousEmailAccountLinking: true,
-    }),
     EmailProvider({
       server: {
         host: process.env.EMAIL_SERVER_HOST,
@@ -39,7 +35,7 @@ export const authOptions = {
       },
     }),
   ],
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as any, // FIXME: Remove as any when types are fixed
   session: { strategy: "jwt" },
   callbacks: {
     session: ({ session, token }) => {

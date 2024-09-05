@@ -16,12 +16,12 @@ export async function startServerPasskeyRegistration() {
 
     const user = await prisma.user.findUnique({
         where: { email: sessionUser?.email as string },
-        select: { id: true, name: true },
+        select: { id: true, email: true },
     });
 
     const createOptions = await passkeyApi.registration.initialize({
         userId: user!.id,
-        username: user!.name || "",
+        username: user!.email || "",
     });
 
     return createOptions;

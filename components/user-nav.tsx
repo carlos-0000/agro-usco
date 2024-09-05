@@ -29,7 +29,7 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
                             src={user.image ?? ""}
                             alt={user.name ?? ""}
                         />
-                        <AvatarFallback>AB</AvatarFallback>
+                        <AvatarFallback>CM</AvatarFallback>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>
@@ -49,7 +49,7 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
                     <Link href="/dashboard">Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/dashboard/settings">Settings</Link>
+                    <Link href="/dashboard/settings">Configuraciones</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -61,7 +61,7 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
                         })
                     }}
                 >
-                    Sign out
+                    Cerrar sesión
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
