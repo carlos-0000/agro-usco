@@ -1,44 +1,36 @@
-# Integrating Passkey Authentication in a Next.js App using NextAuth and Hanko Passkey API
+# Mercado Agro
 
-This repository demonstrates how to add passkey login functionality to your Next.js app using NextAuth and Hanko Passkey API. Passkey authentication is a secure and user-friendly alternative to traditional password-based authentication, providing a seamless login experience for users.
+**Mercado Agro** es una plataforma desarrollada para conectar agricultores directamente con clientes, distribuidores y transformadores de materia prima. Este proyecto tiene como objetivo mejorar la competitividad de los agricultores facilitando la venta directa y la negociación de sus productos en el mercado.
 
-For a detailed tutorial on implementing passkey login in your Next.js app using NextAuth, refer to our blog post: [Add passkeys to your Next.js app using NextAuth](https://www.hanko.io/blog/passkeys-nextjs-nextauth)
+Este proyecto fue creado por estudiantes de la Universidad Surcolombiana (USCO) como parte de la materia Proyecto Integrador IV.
 
-![Passkey demo](/passkey.gif)
+![Passkey demo](/passKeyAgro.gif)
 
-## Prerequisites
+## Descripción del Proyecto
 
-Before you begin, ensure you have the following:
+Mercado Agro ofrece una experiencia segura y amigable para los usuarios mediante la autenticación Passkey, utilizando tecnologías modernas para garantizar un acceso sencillo y sin contraseñas. Además de la funcionalidad de autenticación, la plataforma incluye características clave para la gestión de productos y la comunicación directa con compradores potenciales.
 
-- Node.js installed (version 20.0.0 or later)
-- Hanko Passkey API key and tenant ID from [Hanko Cloud](https://cloud.hanko.io/)
-- Resend API key from [Resend](https://resend.com/)
-- DB URL. In this case we are using [Supabase](https://supabase.com/)
+## Tecnologías Utilizadas
 
-## Technologies used
+- **Frontend y Backend**: Next.js alojado en Vercel.
+- **Autenticación**: Hanko Passkey API para una experiencia de inicio de sesión sin contraseñas.
+- **Base de Datos**: Supabase, utilizando PostgreSQL para almacenamiento de datos.
+- **DNS y CDN**: Cloudflare, manejando la configuración del dominio y mejorando el rendimiento de la plataforma.
+- **Envío de Correos**: Resend, utilizado para la gestión y envío de correos electrónicos.
+- **Dominio**: Gestionado a través de Cloudflare, utilizando el dominio `mercadoagro.com.co`.
+- **Otros**: Prisma para la interacción con la base de datos y Shadcn UI para componentes de interfaz de usuario.
 
-- Next.js
-- [Next-Auth](https://authjs.dev/) 
-- [Resend](https://resend.com/)
-- [Shadcn UI](https://ui.shadcn.com/)
-- [Supabase](https://supabase.com/)
-- [Prisma](https://www.prisma.io/)
-- [Hanko Passkey API](https://www.hanko.io/features/hanko-passkey-api)
+## Configuración y Despliegue
 
-> **Note:**
-> You'll need to create a Passkey Project on Hanko Cloud with the App URL `http://localhost:3000`. See our docs to learn how to setup a [passkey project](https://docs.hanko.io/passkey-api/setup-passkey-project).
+1. **Clonar el repositorio**:
 
-## Getting started
+    ```bash
+    git clone https://github.com/carlos-0000/agro-usco.git
+    ```
 
-1. Clone the repository
+2. **Configurar las variables de entorno**:
 
-```bash
-git clone https://github.com/teamhanko/passkeys-next-auth-starter.git
-```
-
-2. Set up environment variables
-
-   * Create a `.env` file in the root directory and add the following environment variables:
+   Crea un archivo `.env` en el directorio raíz y agrega las siguientes variables:
 
     ```sh
     NEXTAUTH_SECRET=random-string
@@ -47,12 +39,12 @@ git clone https://github.com/teamhanko/passkeys-next-auth-starter.git
     GITHUB_ID=
     GITHUB_SECRET_ID=
 
-    # for email service
+    # Configuración del servicio de correos
     EMAIL_SERVER_USER=resend
     EMAIL_SERVER_PASSWORD=your-resend-api-key
     EMAIL_SERVER_HOST=smtp.resend.com
     EMAIL_SERVER_PORT=465
-    EMAIL_FROM=onboarding@resend.dev
+    EMAIL_FROM=onboarding@mercadoagro.com.co
 
     DATABASE_URL=your-db-url
 
@@ -60,45 +52,37 @@ git clone https://github.com/teamhanko/passkeys-next-auth-starter.git
     NEXT_PUBLIC_PASSKEYS_TENANT_ID=your-hanko-passkey-tenant-id
     ```
 
-   * Replace `your-hanko-passkey-api-key` and `your-hanko-passkey-tenant-id` with your actual Hanko Passkey API key and tenant ID.
+   Asegúrate de reemplazar los valores de `PASSKEYS_API_KEY` y `NEXT_PUBLIC_PASSKEYS_TENANT_ID` con los datos reales de Hanko Passkey API.
 
-1. Install the dependencies using your preferred package manager (e.g., `npm`, `pnpm`, `yarn`, or `bun`). For this project, we've used `pnpm`:
+3. **Instalar dependencias**:
 
-```bash
-pnpm install
-```
+   Utiliza tu gestor de paquetes preferido (ej. `npm`, `pnpm`, `yarn`). Para este proyecto, usamos `pnpm`:
 
-4. Start the development server:
+    ```bash
+    pnpm install
+    ```
 
-```bash
-pnpm dev
-```
+4. **Iniciar el servidor de desarrollo**:
 
-## Usage
+    ```bash
+    pnpm dev
+    ```
 
-1. Start the application:
+## Uso
 
-   - Access the application by navigating to `http://localhost:3000` in your web browser.
+1. **Iniciar la aplicación**:
 
-2. Sign up using email or GitHub.
+   - Accede a la aplicación navegando a `http://localhost:3000` en tu navegador.
 
-3. Register a passkey:
+2. **Registro e inicio de sesión**:
 
-   - After logging in, register a passkey for the logged-in user.
+   - Regístrate usando email o GitHub.
+   - Registra una passkey para tu usuario.
 
-4. Log out:
+3. **Iniciar sesión con passkey**:
 
-   - After the passkey registration is successful, log out of the application.
+   - En la página de inicio de sesión, selecciona la opción para iniciar sesión con una passkey.
 
-5. Login with with a passkey
+## Contribución
 
-   - On the login page, choose sign in with a passkey option to authenticate using a passkey.
-
-## Support
-
-Feel free to reach out to us on [Discord](https://hanko.io/community) if you get into any issues.
-
-## License
-
-This project is licensed under the MIT License.
-
+Este proyecto ha sido desarrollado por estudiantes de la Universidad Surcolombiana (USCO) para la materia Proyecto Integrador IV. Agradecemos tu interés y cualquier contribución para mejorar la plataforma.
