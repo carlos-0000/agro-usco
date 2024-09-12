@@ -9,7 +9,7 @@ export const GettingStartButton: React.FC = () => {
 
     return (
         <Button onClick={() => push('/login')} className={'mt-5'}>
-            Vamos a empezar! (DEV)
+            Vamos a empezar!
         </Button>
     );
 }
