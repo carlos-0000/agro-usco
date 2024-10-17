@@ -123,3 +123,18 @@
     --ring: 240 4.9% 83.9%;
   }
 }
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(50px); /* Movimiento hacia abajo */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0); /* Posición final */
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 1.5s ease-out forwards; /* forwards mantiene el estado final de la animación */
+}
