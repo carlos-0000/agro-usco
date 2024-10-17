@@ -1,0 +1,93 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model UserType {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  nationalId       String            @unique
+  phoneNumber      String
+  pinHash          String?
+  userTypeId       Int?
+  userType         UserType?         @relation(fields: [userTypeId], references: [id])
+  accountStatus    AccountStatus     @default(ACTIVE)
+  failedAttempts   Int               @default(0)
+  lastFailedAt     DateTime?
+  lockUntil        DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  smsVerifications SmsVerification[]
+  accountLocks     AccountLock[]
+  loginAttempts    LoginAttempt[]
+  notifications    Notification[]
+
+  @@index([nationalId], name: "idx_national_id")
+  @@index([phoneNumber], name: "idx_phone_number")
+}
+
+enum AccountStatus {
+  ACTIVE
+  TEMPORARILY_LOCKED
+  PERMANENTLY_LOCKED
+}
+
+model SmsVerification {
+  id        Int                 @id @default(autoincrement())
+  userId    Int
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  expiresAt DateTime
+  purpose   VerificationPurpose
+  createdAt DateTime            @default(now())
+}
+
+enum VerificationPurpose {
+  REGISTRATION
+  PIN_RECOVERY
+}
+
+model AccountLock {
+  id       Int       @id @default(autoincrement())
+  userId   Int
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lockType LockType
+  lockedAt DateTime  @default(now())
+  unlockAt DateTime?
+}
+
+enum LockType {
+  TEMPORARY
+  PERMANENT
+}
+
+model LoginAttempt {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attemptAt DateTime @default(now())
+  success   Boolean
+}
+
+model Notification {
+  id               Int              @id @default(autoincrement())
+  userId           Int
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notificationType NotificationType
+  sentAt           DateTime         @default(now())
+}
+
+enum NotificationType {
+  ACCOUNT_TEMPORARILY_LOCKED
+  ACCOUNT_PERMANENTLY_LOCKED
+  PIN_CHANGED
+}

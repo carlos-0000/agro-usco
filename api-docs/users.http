@@ -1,0 +1,3 @@
+@nationalId = 10038120313
+GET {{origin}}/users/{{nationalId}}
+Accept: application/json

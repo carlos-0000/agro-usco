@@ -1,0 +1,4 @@
+
+@document = 1003807879
+GET http://localhost:3000/api/users/{{document}}
+Accept: application/json

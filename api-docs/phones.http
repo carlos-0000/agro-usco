@@ -1,0 +1,17 @@
+###
+# @name Send verification code
+@phoneNumber = 3506499120
+POST {{origin}}/phones/{{phoneNumber}}/verification-code
+Content-Type: application/json
+Accept: application/json
+
+###
+#@name Verify verification code
+@verificationCode = 123123
+POST {{origin}}/phones/{{phoneNumber}}/verification-code/verify
+Content-Type: application/json
+Accept: application/json
+
+{
+  "code": "{{verificationCode}}"
+}
