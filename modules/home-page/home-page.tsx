@@ -29,7 +29,7 @@ export const HomePage: React.FC = () => {
         <div className="container mx-auto flex justify-between items-center px-6 max-w-7xl">
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold text-green-600 flex items-center space-x-2">
-            <img src="/header.png" alt="Mercado Agro" className="h-24 md:h-auto" />
+            <img src="/Header.png" alt="Mercado Agro" className="h-24 md:h-auto" />
           </Link>
 
           {/* Icono de hamburguesa para móvil */}
@@ -274,8 +274,8 @@ export const HomePage: React.FC = () => {
         </div>
       </Container>
 
-      <Container className="bg-[#FAF8F5] py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full bg-[#FAF8F5] py-16">
+        <Container>
           <div className="text-center mb-12">
             <Text
               className={`uppercase font-semibold mb-2 text-yellow-500 text-2xl ${covered.className}`}
@@ -340,8 +340,8 @@ export const HomePage: React.FC = () => {
               </form>
             </div>
           </div>
-        </div>
-      </Container>
+        </Container>
+      </div>
 
       <footer className="bg-gray-900">
         <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
@@ -351,36 +351,36 @@ export const HomePage: React.FC = () => {
                 href="/"
                 className="text-2xl font-bold text-green-600 flex items-center space-x-2"
               >
-                <img src="/header.png" alt="Mercado Agro" />
+                <img src="/Header.png" alt="Mercado Agro" />
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
               <div>
-                <h2 className="mb-6 text-sm font-semibold text-gray-400 uppercase ">Resources</h2>
+                <h2 className="mb-6 text-sm font-semibold text-gray-400 uppercase ">Menú</h2>
                 <ul className="text-gray-500 dark:text-gray-400 font-medium">
                   <li className="mb-4">
-                    <a href="https://flowbite.com/" className="hover:underline">
-                      Flowbite
+                    <a href="https://mercadoagro.com.co/" className="hover:underline">
+                      Inicio
                     </a>
                   </li>
                   <li>
-                    <a href="https://tailwindcss.com/" className="hover:underline">
-                      Tailwind CSS
+                    <a href="https://mercadoagro.com.co/ingresar" className="hover:underline">
+                      Iniciar sesión
                     </a>
                   </li>
                 </ul>
               </div>
               <div>
-                <h2 className="mb-6 text-sm font-semibold text-gray-400 uppercase ">Follow us</h2>
+                <h2 className="mb-6 text-sm font-semibold text-gray-400 uppercase ">Contáctanos</h2>
                 <ul className="text-gray-500 dark:text-gray-400 font-medium">
                   <li className="mb-4">
-                    <a href="https://github.com/themesberg/flowbite" className="hover:underline ">
-                      Github
+                    <a href="tel:3137257016" className="hover:underline ">
+                      Teléfono: 313 725 7016
                     </a>
                   </li>
                   <li>
-                    <a href="https://discord.gg/4eeurUVvTy" className="hover:underline">
-                      Discord
+                    <a href="mailto:comercial@mercadoagro.com" className="hover:underline">
+                      Correo electrónico: comercial@mercadoagro.com
                     </a>
                   </li>
                 </ul>
@@ -390,12 +390,12 @@ export const HomePage: React.FC = () => {
                 <ul className="text-gray-500 dark:text-gray-400 font-medium">
                   <li className="mb-4">
                     <a href="#" className="hover:underline">
-                      Privacy Policy
+                      Políticas de privacidad
                     </a>
                   </li>
                   <li>
                     <a href="#" className="hover:underline">
-                      Terms &amp; Conditions
+                      Terminos y condiciones
                     </a>
                   </li>
                 </ul>

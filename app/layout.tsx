@@ -7,8 +7,8 @@ import { theme } from '../theme';
 import './globals.css';
 
 export const metadata = {
-  title: 'Mantine Next.js template',
-  description: 'I am using Mantine with Next.js!',
+  title: 'Mercado Agro',
+  description: 'Del campo a tu mesa',
 };
 
 const RootLayout: React.FC<React.PropsWithChildren> = ({ children }) => (
