@@ -268,69 +268,41 @@ export const HomePage: React.FC = () => {
 
       <div className="w-full bg-[#FAF8F5] py-16">
         <Container>
-          <div className="text-center mb-12">
-            <Text
-              className={`uppercase font-semibold mb-2 text-yellow-500 text-2xl ${covered.className}`}
-            >
-              ¿Tienes alguna pregunta?
-            </Text>
-            <Text component="h2" className="text-4xl font-bold text-gray-900">
-              ¡Estamos aquí para ayudarte!
-            </Text>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Información de contacto */}
-            <div className="space-y-4">
-              <div className="bg-yellow-500 text-white py-6 px-8 rounded-md">
-                <div className="flex items-center space-x-4">
-                  <img src="/phone-icon.png" alt="Teléfono" className="w-6 h-6" />
-                  <div>
-                    <Text className={`font-bold text-2xl ${covered.className}`}>Teléfono</Text>
-                    <Text>313 725 70 16</Text>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-yellow-500 text-white py-6 px-8 rounded-md">
-                <div className="flex items-center space-x-4">
-                  <img src="/email-icon.png" alt="Correo" className="w-6 h-6" />
-                  <div>
-                    <Text className={`font-bold text-2xl ${covered.className}`}>Correo</Text>
-                    <Text>comercial@mercadoagro.com</Text>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Formulario de contacto */}
-            <div className="p-8 rounded-md">
-              <form className="space-y-4">
-                <div className="flex space-x-4">
-                  <input
-                    type="text"
-                    name="nombre"
-                    placeholder="Nombre"
-                    className="w-1/2 px-4 py-2 border border-gray-300 rounded-md"
-                  />
-                  <input
-                    type="email"
-                    name="correo"
-                    placeholder="Correo electrónico"
-                    className="w-1/2 px-4 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <textarea
-                  name="mensaje"
-                  placeholder="Mensaje"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                />
-                <button
-                  type="submit"
-                  className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+          <div className="w-full bg-[#FAF8F5] py-16">
+            <Container>
+              <div className="text-center mb-12">
+                <Text
+                    className={`uppercase font-semibold mb-2 text-yellow-500 text-2xl ${covered.className}`}
                 >
-                  Enviar mensaje
-                </button>
-              </form>
-            </div>
+                  ¿Tienes alguna pregunta?
+                </Text>
+                <Text component="h2" className="text-4xl font-bold text-gray-900">
+                  ¡Estamos aquí para ayudarte!
+                </Text>
+              </div>
+              <div className="flex flex-col md:flex-row justify-center md:space-x-4">
+                {/* Información de contacto */}
+                <div className="bg-yellow-500 text-white py-6 px-8 rounded-md mb-4 md:mb-0">
+                  <div className="flex items-center space-x-4">
+                    <img src="/phone-icon.png" alt="Teléfono" className="w-6 h-6"/>
+                    <div>
+                      <Text className={`font-bold text-2xl ${covered.className}`}>Teléfono</Text>
+                      <Text>313 725 70 16</Text>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-yellow-500 text-white py-6 px-8 rounded-md">
+                  <div className="flex items-center space-x-4">
+                    <img src="/email-icon.png" alt="Correo" className="w-6 h-6"/>
+                    <div>
+                      <Text className={`font-bold text-2xl ${covered.className}`}>Correo</Text>
+                      <Text>comercial@mercadoagro.com</Text>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Container>
           </div>
         </Container>
       </div>
@@ -340,10 +312,10 @@ export const HomePage: React.FC = () => {
           <div className="md:flex md:justify-between">
             <div className="mb-6 md:mb-0">
               <Link
-                href="/"
-                className="text-2xl font-bold text-green-600 flex items-center space-x-2"
+                  href="/"
+                  className="text-2xl font-bold text-green-600 flex items-center space-x-2"
               >
-                <img src="/Header.png" alt="Mercado Agro" />
+                <img src="/Header.png" alt="Mercado Agro"/>
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
