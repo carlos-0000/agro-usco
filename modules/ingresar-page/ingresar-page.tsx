@@ -81,8 +81,8 @@ export function IngresarPage() {
     Direction.Next,
   ]);
 
-
   const [isLoading, setIsLoading] = React.useState(false);
+  const [actualizarPin, setActualizarPin] = React.useState(false);
 
   const [document, setDocument] = React.useState('');
   const [phone, setPhone] = React.useState<number | undefined>();
@@ -219,33 +219,66 @@ export function IngresarPage() {
   );
 
   const trySignIn = React.useCallback(() => {
+    //
+      console.log('trySignIn');
+      console.log(document);
+      console.log(signInPin);
+      if (signInPin.length < 4) {
+            setAlert({
+                type: AlertType.Error,
+                title: 'Error',
+                message: 'Pin inválido. Debe tener 4 dígitos.',
+            });
+            setIsLoading(false);
+            return;
+      }
     setAlert(null);
-    signIn('credentials', { nationalId: document, pin: signInPin, redirect: false })
-      .then((response) => {
-        if (!response) {
-          setAlert({
-            type: AlertType.Error,
-            title: 'Error',
-            message: 'Ha ocurrido un error inesperado. Intenta de nuevo.',
-          });
-        } else if (response.error) {
-          setAlert({
-            type: AlertType.Error,
-            title: 'Error',
-            message: ErrorMessages[response.error],
-          });
-        } else {
-          navigation.replace('/plaza');
-        }
-      })
-      .catch((r) => console.log(r))
-      .finally(() => setIsLoading(false));
-  }, [document, signInPin]);
+      verifyPinMaxAttempts()
+        .then(() => {
+            signIn('credentials', { nationalId: document, pin: signInPin, redirect: false })
+            .then((response) => {
+                if (!response) {
+                setAlert({
+                    type: AlertType.Error,
+                    title: 'Error',
+                    message: 'Ha ocurrido un error inesperado. Intenta de nuevo.',
+                });
+                } else if (response.error) {
+                setAlert({
+                    type: AlertType.Error,
+                    title: 'Error',
+                    message: ErrorMessages[response.error],
+                });
+                } else {
+                navigation.replace('/plaza');
+                }
+            })
+            .catch((r) => console.log(r))
+            .finally(() => setIsLoading(false));
+        })
+        .catch(() => {
+            setAlert({
+                type: AlertType.Error,
+                title: 'Error',
+                message: 'Has alcanzado el número máximo de intentos. Actualiza tu pin para desbloquearla.',
+            });
+            setActualizarPin(true);
+            setIsLoading(false);
+        })
+          .finally(() => setIsLoading(false));
+    }, [document, signInPin]);
 
   const setUserPin = () =>
     new Promise<void>((resolve, reject) => {
       api
         .put<void>(`/users/${document}/pin`, { pin: registerPin })
+        .then(() => resolve())
+        .catch(() => reject());
+    });
+  const verifyPinMaxAttempts = () =>
+    new Promise<void>((resolve, reject) => {
+      api
+        .post<void>(`/users/${document}/pin/verifyAttempts`, { pin: signInPin })
         .then(() => resolve())
         .catch(() => reject());
     });
@@ -306,6 +339,16 @@ export function IngresarPage() {
         },
         [Page.Phone]() {
           setIsLoading(true);
+          // Validar que el número de teléfono tenga 10 dígitos y no esté vacío
+            if (!phone || phone.toString().length !== 10) {
+                setAlert({
+                type: AlertType.Error,
+                title: 'Error',
+                message: 'Número de teléfono inválido. Debe tener 10 dígitos.',
+                });
+                setIsLoading(false);
+                return;
+            }
           validatePhone()
             .then(() => {
               assignPhone().then(() =>
@@ -385,6 +428,7 @@ export function IngresarPage() {
     validatePhone,
     assignPhone,
     trySignIn,
+    actualizarPin,
   ]);
 
   const backButtonAction = React.useCallback(() => {
@@ -433,7 +477,7 @@ export function IngresarPage() {
         p={30}
         radius="md"
         mt="xl"
-        h={rem((Page.Document === page) ? (!alert ? 180 : 320) : 450)}
+        h={rem((Page.Document === page) ? (!alert ? 180 : 320) : 480)}
         style={{ overflow: 'hidden' }}
       >
         <Box
@@ -512,12 +556,14 @@ export function IngresarPage() {
                                 <Anchor
                                   onClick={() => {
                                     setIsLoading(true);
+                                    setActualizarPin(false);
                                     setVerificationPurpose(VerificationPurpose.PIN_RECOVERY);
                                     sendVerificationCode(VerificationPurpose.PIN_RECOVERY).then(
                                       () => {
                                         setPage([Page.VerifyPhone, Direction.Next]);
                                       }
                                     );
+
                                   }}
                                 >
                                   Recuperar
@@ -530,20 +576,21 @@ export function IngresarPage() {
                           <>
                             <Text>
                               Para continuar con el registro, necesitamos tu número de teléfono para
-                              verificar tu identidad.
+                              verificar tu identidad. <strong>Sólo números de Colombia</strong>
                             </Text>
-                            <NumberInput
-                              type="tel"
-                              label="Teléfono"
-                              required
-                              minLength={10}
-                              maxLength={12}
-                              hideControls
-                              value={phone}
-                              onChange={(value) => {
-                                setPhone(value as number);
-                              }}
-                            />
+                              <NumberInput
+                                  type="tel"
+                                  label="Teléfono"
+                                  required
+                                  minLength={10}
+                                  maxLength={10}
+                                  hideControls
+                                  leftSection={<Text size="lg">🇨🇴</Text>}
+                                  value={phone}
+                                  onChange={(value) => {
+                                      setPhone(value as number);
+                                  }}
+                              />
                           </>
                         ),
                         [Page.VerifyPhone]: (
@@ -642,16 +689,37 @@ export function IngresarPage() {
             ) : null}
           </Box>
           <Group w="100%" wrap="nowrap">
-            <Button
-              rightSection={<IconArrowRight size={16} />}
-              style={{ width: '100%' }}
-              onClick={() => {
-                nextButtonAction();
-              }}
-              loading={isLoading}
-            >
-              {nextButtonText}
-            </Button>
+              {
+              (actualizarPin ? (
+                  <Button
+                    rightSection={<IconArrowRight size={16} />}
+                    style={{ width: '100%' }}
+                    onClick={() => {
+                        setIsLoading(true);
+                        setActualizarPin(false);
+                        setVerificationPurpose(VerificationPurpose.PIN_RECOVERY);
+                        sendVerificationCode(VerificationPurpose.PIN_RECOVERY).then(
+                            () => {
+                                setPage([Page.VerifyPhone, Direction.Next]);
+                            }
+                        );
+                  }}
+                    loading={isLoading}
+                  >
+                      Actualizar Pin
+                  </Button>
+              ) : (
+                  <Button
+                    rightSection={<IconArrowRight size={16} />}
+                    style={{ width: '100%' }}
+                    onClick={() => {
+                          nextButtonAction();
+                      }}
+                    loading={isLoading}
+                  >
+                      {nextButtonText}
+                  </Button>
+              ))}
           </Group>
         </Box>
       </Paper>

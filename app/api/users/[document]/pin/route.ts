@@ -34,7 +34,7 @@ export const PUT = async (req: NextRequest, { params }: { params: { document: st
 
     await prisma.user.update({
       where: { nationalId: document },
-      data: { pinHash, accountStatus: AccountStatus.ACTIVE },
+      data: { pinHash, accountStatus: AccountStatus.ACTIVE, failedAttempts: 0 },
     });
 
     return NextResponse.json({ user });
