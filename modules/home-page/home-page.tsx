@@ -143,7 +143,7 @@ export const HomePage: React.FC = () => {
       <div className="relative bg-cover bg-center md:h-screen md:bg-[url('/fondo.png')] bg-white">
         <Container className="relative z-10 h-full flex flex-col justify-center items-start px-8 md:px-24 lg:px-48">
           {/* Sección de ESCRITORIO */}
-          <div className="hidden md:block">
+          <div className="hidden md:block" style={{ marginLeft: '-200px' }}>
             <Text component="h2" className="text-white text-sm mb-2 animate-fadeIn">
               FRESCURA GARANTIZADA
             </Text>
@@ -160,7 +160,7 @@ export const HomePage: React.FC = () => {
             </Link>
 
             {/* Imagen del agricultor solo para ESCRITORIO */}
-            <div className="absolute bottom-0 right-0 mb-8 mr-8 hidden md:block">
+            <div className="absolute bottom-0 right-0 mb-8 mr-8 hidden md:block" style={{ marginRight: '-20rem' }}>
               <img
                 src="/farmer-illustration.png"
                 alt="Agricultor"
@@ -201,15 +201,6 @@ export const HomePage: React.FC = () => {
             </Link>
           </div>
         </Container>
-
-        {/* Imagen del agricultor para escritorio */}
-        <div className="absolute bottom-0 right-0 mb-8 mr-8 hidden md:block">
-          <img
-            src="/farmer-illustration.png"
-            alt="Agricultor"
-            className="w-80 md:w-[50rem] h-auto animate-fadeIn"
-          />
-        </div>
       </div>
 
       <Container className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
