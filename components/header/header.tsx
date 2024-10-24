@@ -28,20 +28,16 @@ import { useDisclosure } from '@mantine/hooks';
 import classes from './header.module.css';
 
 const user = {
-  name: 'Jane Spoonfighter',
+  name: 'Usuario',
   email: 'janspoon@fighter.dev',
-  image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
+  image: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png',
 };
 
 const tabs = [
-  'Mercado',
-  'Orders',
-  'Education',
-  'Community',
-  'Forums',
-  'Support',
-  'Account',
-  'Helpdesk',
+  'Mercado Agro',
+    'Productos',
+    'Categorias',
+    'Ofertas',
 ];
 
 export const Header = () => {

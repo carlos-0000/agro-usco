@@ -81,7 +81,6 @@ export function IngresarPage() {
     Direction.Next,
   ]);
 
-  const [clock, setClock] = React.useState<string>('');
 
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -227,7 +226,7 @@ export function IngresarPage() {
           setAlert({
             type: AlertType.Error,
             title: 'Error',
-            message: 'Nos e que paso manito',
+            message: 'Ha ocurrido un error inesperado. Intenta de nuevo.',
           });
         } else if (response.error) {
           setAlert({
@@ -269,6 +268,16 @@ export function IngresarPage() {
       ({
         [Page.Document]() {
           setIsLoading(true);
+          // Validar que el documento tenga un largor entre 6-15 y no esté vacío
+            if (document.length < 6 || document.length > 15) {
+                setAlert({
+                type: AlertType.Error,
+                title: 'Error',
+                message: 'Documento inválido. Debe tener entre 6 y 15 caracteres.',
+                });
+                setIsLoading(false);
+                return;
+            }
           validateUser()
             .then((user) =>
               user.accountStatus === AccountStatus.ACTIVE
@@ -286,7 +295,14 @@ export function IngresarPage() {
           setIsLoading(true);
           setUserPin()
             .then(() => signIn('credentials', { nationalId: document, pin: registerPin }))
-            .catch(() => window.alert('Error setting pin. Try again'));
+            .catch(() => {
+                setAlert({
+                    type: AlertType.Error,
+                    title: 'Error',
+                    message: 'Pin inválido. Intenta de nuevo.',
+                });
+                setIsLoading(false);
+            });
         },
         [Page.Phone]() {
           setIsLoading(true);
@@ -296,12 +312,23 @@ export function IngresarPage() {
                 sendVerificationCode()
                   .then(() => setPage([Page.VerifyPhone, Direction.Next]))
                   .catch(() => {
-                    window.alert('Error sending verification code');
+                    setAlert({
+                        type: AlertType.Error,
+                        title: 'Error',
+                        message: 'Error al enviar el código de verificación. Intenta de nuevo.',
+                    });
                     setIsLoading(false);
                   })
               );
             })
-            .catch(() => window.alert('Phone already taken'));
+            .catch(() => {
+                setAlert({
+                    type: AlertType.Error,
+                    title: 'Error',
+                    message: 'El número de teléfono ya ha sido registrado, intenta con otro.',
+                });
+                setIsLoading(false);
+            });
         },
         [Page.VerifyPhone]() {
           setIsLoading(true);
@@ -311,24 +338,37 @@ export function IngresarPage() {
           if (codeExpireDate && now > codeExpireDate) {
             if (waitUntilTime && now < waitUntilTime) {
               sendVerificationCode().then(() => {
-                window.alert('El código anterior ha expirado. Hemos enviado un nuevo código.');
+                setAlert({
+                    type: AlertType.Warning,
+                    title: 'Código expirado',
+                    message: 'El código anterior ha expirado. Hemos enviado un nuevo código.',
+                });
                 setIsLoading(false);
               });
             } else {
-              window.alert('El código ha expirado. Intenta de nuevo más tarde.');
+                setAlert({
+                    type: AlertType.Error,
+                    title: 'Error',
+                    message: 'El código ha expirado. Intenta de nuevo más tarde.',
+                });
               setIsLoading(false);
             }
           } else {
             validateCode()
               .then(() => setPage([Page.CreatePin, Direction.Next]))
               .catch(() => {
-                window.alert('Invalid code');
+                  setAlert({
+                      type: AlertType.Error,
+                      title: 'Error',
+                      message: 'Código de verificación inválido. Intenta de nuevo.',
+                  });
                 setIsLoading(false);
               });
           }
         },
         [Page.Success]() {
-          setPage([Page.Document, Direction.Next]);
+            setAlert(null);
+            setPage([Page.Document, Direction.Next]);
         },
         [Page.Pin]() {
           setIsLoading(true);
@@ -377,22 +417,9 @@ export function IngresarPage() {
     }
   }, [waitUntilTime]);
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
-      setClock(`${hours}:${minutes}:${seconds}`);
-    }, 1000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
   return (
     <Container size={460} my={30}>
-      {clock}
+      {/*{clock}*/}
       <Title className={classes.title} ta="center">
         Ingresar a Mercado Agro
       </Title>
@@ -406,7 +433,7 @@ export function IngresarPage() {
         p={30}
         radius="md"
         mt="xl"
-        h={rem(450)}
+        h={rem((Page.Document === page) ? (!alert ? 180 : 320) : 450)}
         style={{ overflow: 'hidden' }}
       >
         <Box
@@ -446,21 +473,26 @@ export function IngresarPage() {
                     (
                       {
                         [Page.Document]: (
-                          <TextInput
+                          <NumberInput
                             label="Documento"
                             placeholder="1234567890"
                             required
                             minLength={6}
-                            maxLength={20}
+                            maxLength={15}
                             value={document}
-                            onChange={(event) => setDocument(event.currentTarget.value)}
+                            onChange={(event) => {
+                                setDocument(
+                                    String(event as number)
+                                );
+                            }
+                          }
                             readOnly={isLoading}
                           />
                         ),
                         [Page.Pin]: (
                           <>
                             <Text size="lg">
-                              Hola, <strong>Carlos</strong>!
+                              Bienvenido!
                             </Text>
                             <Text>Ingresa tu pin para continuar.</Text>
                             <Flex align="center" direction="column" gap="sm">
@@ -539,7 +571,11 @@ export function IngresarPage() {
                                   style={{ flexShrink: 0 }}
                                   onClick={() => {
                                     sendVerificationCode().catch(() => {
-                                      window.alert('Error sending verification code');
+                                        setAlert({
+                                            type: AlertType.Error,
+                                            title: 'Error',
+                                            message: 'Error al enviar el código de verificación. Intenta de nuevo.',
+                                        });
                                     });
                                   }}
                                 >
