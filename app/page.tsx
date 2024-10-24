@@ -1,13 +1,10 @@
 import React from 'react';
-import { LogOutButton } from '@/components';
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
-import { Welcome } from '../components/Welcome/Welcome';
+import { NextPage } from 'next';
+import { HomePage } from '@/modules/home-page';
 
-const HomePage = async () => (
+const Page: NextPage = async () => (
   <>
-    <LogOutButton />
-    <Welcome />
-    <ColorSchemeToggle />
+    <HomePage />
   </>
 );
-export default HomePage;
+export default Page;
