@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { AccountStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 export const GET = async (req: NextRequest, { params }: { params: { phone: string } }) => {
@@ -8,6 +9,7 @@ export const GET = async (req: NextRequest, { params }: { params: { phone: strin
     const user = await prisma.user.findFirst({
       where: {
         phoneNumber: `+57${phone}`,
+        accountStatus: AccountStatus.ACTIVE,
       },
     });
 

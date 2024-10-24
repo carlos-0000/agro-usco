@@ -7,7 +7,7 @@ Accept: application/json
 
 ###
 #@name Verify verification code
-@verificationCode = 123123
+@verificationCode = 101568
 POST {{origin}}/phones/{{phoneNumber}}/verification-code/verify
 Content-Type: application/json
 Accept: application/json

@@ -16,11 +16,11 @@ model UserType {
 model User {
   id               Int               @id @default(autoincrement())
   nationalId       String            @unique
-  phoneNumber      String
+  phoneNumber      String?
   pinHash          String?
   userTypeId       Int?
   userType         UserType?         @relation(fields: [userTypeId], references: [id])
-  accountStatus    AccountStatus     @default(ACTIVE)
+  accountStatus    AccountStatus     @default(PENDING_ACTIVATION)
   failedAttempts   Int               @default(0)
   lastFailedAt     DateTime?
   lockUntil        DateTime?
@@ -36,6 +36,7 @@ model User {
 }
 
 enum AccountStatus {
+  PENDING_ACTIVATION
   ACTIVE
   TEMPORARILY_LOCKED
   PERMANENTLY_LOCKED
@@ -48,7 +49,7 @@ model SmsVerification {
   codeHash  String
   expiresAt DateTime
   purpose   VerificationPurpose
-  createdAt DateTime            @default(now())
+  createdAt DateTime            @default(now()) @db.Timestamptz(3)
 }
 
 enum VerificationPurpose {

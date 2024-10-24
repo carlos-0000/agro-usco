@@ -1,10 +1,21 @@
 'use client';
 
 import React from 'react';
-import { User } from '@prisma/client';
-import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useRouter as useNavigation } from 'next/navigation';
+import { AccountStatus, User, VerificationPurpose } from '@prisma/client';
 import {
+  IconAlertCircle,
+  IconArrowLeft,
+  IconArrowRight,
+  IconCircleCheck,
+  IconExclamationCircle,
+  IconInfoCircle,
+} from '@tabler/icons-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { signIn } from 'next-auth/react';
+import {
+  Alert,
+  AlertProps,
   Anchor,
   Box,
   Button,
@@ -20,16 +31,21 @@ import {
   TextInput,
   Title,
 } from '@mantine/core';
+import { SendVerificationCodeResponse } from '@/app/api/phones/[phone]/verification-code/route';
 import { api } from '@/lib/api';
 import classes from './ingresar-page.module.css';
 
+const ErrorMessages: Record<string, string> = {
+  CredentialsSignin: 'Credenciales incorrectas. Verifica tu documento y pin e intenta de nuevo.',
+};
+
 enum Page {
-  Document = 'document',
-  Pin = 'pin',
-  Phone = 'phone',
-  VerifyPhone = 'verify_phone',
-  CreatePin = 'create_pin',
-  Success = 'success',
+  Document,
+  Pin,
+  Phone,
+  VerifyPhone,
+  CreatePin,
+  Success,
 }
 
 enum Direction {
@@ -43,16 +59,50 @@ const variants = {
   exit: (d: Direction) => ({ zIndex: 0, x: d === Direction.Next ? 100 : -100, opacity: 0 }),
 };
 
+class ErrorUserNotFound extends Error {
+  constructor() {
+    super('User not found');
+    this.name = 'ErrorUserNotFound';
+  }
+}
+
+enum AlertType {
+  Success,
+  Error,
+  Warning,
+  Info,
+}
+
 export function IngresarPage() {
+  const navigation = useNavigation();
+
   const [[page, direction], setPage] = React.useState<[Page, Direction]>([
     Page.Document,
     Direction.Next,
   ]);
 
+  const [clock, setClock] = React.useState<string>('');
+
   const [isLoading, setIsLoading] = React.useState(false);
 
   const [document, setDocument] = React.useState('');
   const [phone, setPhone] = React.useState<number | undefined>();
+  const [code, setCode] = React.useState('');
+  const [registerPin, setRegisterPin] = React.useState('');
+  const [signInPin, setSignInPin] = React.useState('');
+  const [verificationPurpose, setVerificationPurpose] = React.useState<VerificationPurpose>(
+    VerificationPurpose.REGISTRATION
+  );
+
+  const [waitUntilTime, setWaitUntilTime] = React.useState<Date | null>(null);
+  const [tryAgainCountDown, setTryAgainCountDown] = React.useState<string>('');
+  const [codeExpireDate, setCodeExpireDate] = React.useState<Date | null>(null);
+
+  const [alert, setAlert] = React.useState<{
+    type: AlertType;
+    title: string;
+    message: string;
+  } | null>(null);
 
   const motionDivProps: React.ComponentProps<typeof motion.div> = {
     custom: direction,
@@ -66,109 +116,283 @@ export function IngresarPage() {
 
   const validateUser = React.useCallback(
     () =>
+      new Promise<User>((resolve, reject) => {
+        document
+          ? api
+              .get<{ user: User }>(`/users/${document}`)
+              .then(({ data }) => {
+                if (!data.user) reject(new ErrorUserNotFound());
+                resolve(data.user);
+              })
+              .catch(() => reject(new ErrorUserNotFound()))
+          : reject();
+      }),
+    [document]
+  );
+
+  const assignPhone = React.useCallback(
+    () =>
       new Promise<void>((resolve, reject) => {
-        if (document) {
+        if (phone) {
           api
-            .get<{ user: User }>(`/users/${document}`)
+            .patch<void>(`/users/${document}`, { phone })
             .then(() => resolve())
             .catch(() => reject());
         } else {
           reject();
         }
       }),
-    [document]
+    [document, phone]
   );
 
-  // const validatePhone = React.useCallback(
-  //   () =>
-  //     new Promise<void>((resolve, reject) => {
-  //       console.log(phone);
-  //       if (phone) {
-  //         api
-  //           .get<{ phone: number }>(`/phones/${phone}`)
-  //           .then(() => reject()) // Phone taken already
-  //           .catch(() => resolve());
-  //       } else {
-  //         reject();
-  //       }
-  //     }),
-  //   [phone]
-  // );
-
-  const validatePhone = () =>
-    new Promise<void>((resolve, reject) => {
-      console.log(phone);
-      if (phone) {
-        api
-          .get<{ phone: number }>(`/phones/${phone}`)
-          .then(() => reject()) // Phone taken already
-          .catch(() => resolve());
-      } else {
-        reject();
-      }
-    });
-
-  const sendVerificationCode = React.useCallback(
+  const validatePhone = React.useCallback(
     () =>
       new Promise<void>((resolve, reject) => {
+        if (phone) {
+          api
+            .get<{ phone: number }>(`/phones/${phone}`)
+            .then(() => reject()) // Phone taken already
+            .catch(() => resolve());
+        } else {
+          reject();
+        }
+      }),
+    [phone]
+  );
+
+  const sendVerificationCode = React.useCallback(
+    (purpose?: VerificationPurpose) =>
+      new Promise<void>((resolve, reject) => {
+        let url = `/phones/${phone}/verification-code`;
+
+        const verPurpose = purpose || verificationPurpose;
+
+        if (verPurpose === VerificationPurpose.PIN_RECOVERY) {
+          url = `/users/${document}/pin/recovery`;
+        }
+
         api
-          .post<{ user: User }>(`/users/${document}`, { phoneNumber: phone })
-          .then(() => {
-            api
-              .post<{ message: string }>(`/phones/${phone}/verification-code`)
-              .then(() => resolve())
-              .catch(() => reject());
+          .post<SendVerificationCodeResponse>(
+            url,
+            { purpose: verPurpose },
+            { validateStatus: (status) => status === 429 || (status >= 200 && status < 300) }
+          )
+          .then(({ data, status }) => {
+            if ('error' in data) {
+              if (status === 429 && data.error.details) {
+                setWaitUntilTime(new Date(data.error.details.tryAgainAt));
+                setCodeExpireDate(new Date(data.error.details.lastVerification.expiresAt));
+              }
+            } else {
+              setWaitUntilTime(new Date(data.data.tryAgainAt));
+              setCodeExpireDate(new Date(data.data.expiresAt));
+            }
+            resolve();
           })
           .catch(() => reject());
       }),
-    [phone]
+    [phone, verificationPurpose, document]
+  );
+
+  const createUser = React.useCallback(
+    () =>
+      new Promise<User>((resolve, reject) => {
+        api
+          .post<{ user: User }>(`/users/${document}`)
+          .then(({ data }) => resolve(data.user))
+          .catch(() => reject());
+      }),
+    [document]
+  );
+
+  const validateCode = React.useCallback(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        api
+          .post<{ code: string }>(`/phones/${phone}/verification-code/verify`, {
+            code,
+            nationalId: document,
+          })
+          .then(() => resolve())
+          .catch(() => reject());
+      }),
+    [phone, code]
+  );
+
+  const trySignIn = React.useCallback(() => {
+    setAlert(null);
+    signIn('credentials', { nationalId: document, pin: signInPin, redirect: false })
+      .then((response) => {
+        if (!response) {
+          setAlert({
+            type: AlertType.Error,
+            title: 'Error',
+            message: 'Nos e que paso manito',
+          });
+        } else if (response.error) {
+          setAlert({
+            type: AlertType.Error,
+            title: 'Error',
+            message: ErrorMessages[response.error],
+          });
+        } else {
+          navigation.replace('/plaza');
+        }
+      })
+      .catch((r) => console.log(r))
+      .finally(() => setIsLoading(false));
+  }, [document, signInPin]);
+
+  const setUserPin = () =>
+    new Promise<void>((resolve, reject) => {
+      api
+        .put<void>(`/users/${document}/pin`, { pin: registerPin })
+        .then(() => resolve())
+        .catch(() => reject());
+    });
+
+  const nextButtonText = React.useMemo(
+    () =>
+      ({
+        [Page.Document]: 'Continuar',
+        [Page.Pin]: 'Continuar',
+        [Page.Phone]: 'Continuar',
+        [Page.VerifyPhone]: 'Verificar',
+        [Page.CreatePin]: 'Continuar',
+        [Page.Success]: 'Ingresar',
+      })[page],
+    [page]
   );
 
   const nextButtonAction = React.useCallback(() => {
     (
       ({
-        document() {
+        [Page.Document]() {
           setIsLoading(true);
           validateUser()
-            .then(() => setPage([Page.Pin, Direction.Next]))
-            .catch(() => setPage([Page.Phone, Direction.Next]));
+            .then((user) =>
+              user.accountStatus === AccountStatus.ACTIVE
+                ? setPage([Page.Pin, Direction.Next])
+                : setPage([Page.Phone, Direction.Next])
+            )
+            .catch(() =>
+              createUser().then(() => {
+                setPage([Page.Phone, Direction.Next]);
+                setVerificationPurpose(VerificationPurpose.REGISTRATION);
+              })
+            );
         },
-        // pin() {
-        //   return validatePin.then(() => login()).catch(() => reEnterPin());
-        // },
-        phone() {
+        [Page.CreatePin]() {
+          setIsLoading(true);
+          setUserPin()
+            .then(() => signIn('credentials', { nationalId: document, pin: registerPin }))
+            .catch(() => window.alert('Error setting pin. Try again'));
+        },
+        [Page.Phone]() {
           setIsLoading(true);
           validatePhone()
             .then(() => {
-              console.log('sendVerificationCode');
-              sendVerificationCode().then(() => setPage([Page.VerifyPhone, Direction.Next]));
+              assignPhone().then(() =>
+                sendVerificationCode()
+                  .then(() => setPage([Page.VerifyPhone, Direction.Next]))
+                  .catch(() => {
+                    window.alert('Error sending verification code');
+                    setIsLoading(false);
+                  })
+              );
             })
-            .catch(() => {}); // Re enter phone
+            .catch(() => window.alert('Phone already taken'));
         },
-        // verify_phone() {
-        //   return validateCode
-        //     .then(() => setPage([Page.CreatePin, Direction.Next]))
-        //     .catch(() => reEnterCode());
-        // },
-        // create_pin() {
-        //   return validatePin
-        //     .then(() => setPage([Page.Success, Direction.Next]))
-        //     .catch(() => reEnterPin());
-        // },
+        [Page.VerifyPhone]() {
+          setIsLoading(true);
+
+          const now = new Date();
+
+          if (codeExpireDate && now > codeExpireDate) {
+            if (waitUntilTime && now < waitUntilTime) {
+              sendVerificationCode().then(() => {
+                window.alert('El código anterior ha expirado. Hemos enviado un nuevo código.');
+                setIsLoading(false);
+              });
+            } else {
+              window.alert('El código ha expirado. Intenta de nuevo más tarde.');
+              setIsLoading(false);
+            }
+          } else {
+            validateCode()
+              .then(() => setPage([Page.CreatePin, Direction.Next]))
+              .catch(() => {
+                window.alert('Invalid code');
+                setIsLoading(false);
+              });
+          }
+        },
+        [Page.Success]() {
+          setPage([Page.Document, Direction.Next]);
+        },
+        [Page.Pin]() {
+          setIsLoading(true);
+          trySignIn();
+        },
       }) as Record<Page, () => void>
     )[page]();
-  }, [page, validateUser, sendVerificationCode]);
+  }, [
+    page,
+    validateUser,
+    sendVerificationCode,
+    setUserPin,
+    validateCode,
+    validatePhone,
+    assignPhone,
+    trySignIn,
+  ]);
 
   const backButtonAction = React.useCallback(() => {
     setPage([Page.Document, Direction.Back]);
   }, [page]);
 
   React.useEffect(() => {
+    setAlert(null);
     setIsLoading(false);
   }, [page]);
 
+  // eslint-disable-next-line consistent-return
+  React.useEffect(() => {
+    if (waitUntilTime) {
+      const interval = setInterval(() => {
+        const now = new Date();
+        const diff = waitUntilTime.getTime() - now.getTime();
+        if (diff > 0) {
+          setTryAgainCountDown(
+            new Date(diff).toISOString().slice(11, 19).replace(/^00:/, '').replace(/^0/, '')
+          );
+        } else {
+          setWaitUntilTime(null);
+          clearInterval(interval);
+        }
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [waitUntilTime]);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      setClock(`${hours}:${minutes}:${seconds}`);
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <Container size={460} my={30}>
+      {clock}
       <Title className={classes.title} ta="center">
         Ingresar a Mercado Agro
       </Title>
@@ -186,7 +410,12 @@ export function IngresarPage() {
         style={{ overflow: 'hidden' }}
       >
         <Box
-          style={{ display: 'grid', gridTemplateRows: '1fr auto', gridTemplateColumns: '1fr' }}
+          style={{
+            display: 'grid',
+            gridTemplateRows: '1fr auto auto',
+            gridTemplateColumns: '1fr',
+            gap: '1rem',
+          }}
           h="100%"
         >
           <Box pos="relative">
@@ -225,6 +454,7 @@ export function IngresarPage() {
                             maxLength={20}
                             value={document}
                             onChange={(event) => setDocument(event.currentTarget.value)}
+                            readOnly={isLoading}
                           />
                         ),
                         [Page.Pin]: (
@@ -234,9 +464,32 @@ export function IngresarPage() {
                             </Text>
                             <Text>Ingresa tu pin para continuar.</Text>
                             <Flex align="center" direction="column" gap="sm">
-                              <PinInput length={6} type="number" />
+                              <PinInput
+                                length={4}
+                                type="number"
+                                value={signInPin}
+                                onChange={(value) => {
+                                  setAlert(null);
+                                  setSignInPin(value);
+                                }}
+                                error={alert?.type === AlertType.Error}
+                                readOnly={isLoading}
+                              />
                               <Text size="sm">
-                                ¿Olvidaste tu pin? <Anchor>Recuperar</Anchor>
+                                ¿Olvidaste tu pin?{' '}
+                                <Anchor
+                                  onClick={() => {
+                                    setIsLoading(true);
+                                    setVerificationPurpose(VerificationPurpose.PIN_RECOVERY);
+                                    sendVerificationCode(VerificationPurpose.PIN_RECOVERY).then(
+                                      () => {
+                                        setPage([Page.VerifyPhone, Direction.Next]);
+                                      }
+                                    );
+                                  }}
+                                >
+                                  Recuperar
+                                </Anchor>
                               </Text>
                             </Flex>
                           </>
@@ -267,11 +520,51 @@ export function IngresarPage() {
                               Ingresa el código de verificación que enviamos a tu número de teléfono
                             </Text>
                             <Flex align="center" direction="column" gap="sm">
-                              <PinInput length={6} type="number" />
-                              <Text size="sm">
-                                No has recibido el código? <Anchor>Reenviar (59)</Anchor>
-                              </Text>
+                              <PinInput length={6} type="number" value={code} onChange={setCode} />
+                              <Group wrap="nowrap">
+                                <Text size="sm">
+                                  ¿No has recibido el mensaje de texto?{' '}
+                                  {waitUntilTime ? (
+                                    <>
+                                      Vuelve a intentarlo en{' '}
+                                      <Text fw="bold" span style={{ cursor: 'not-allowed' }}>
+                                        {tryAgainCountDown}
+                                      </Text>
+                                    </>
+                                  ) : null}
+                                </Text>
+                                <Button
+                                  disabled={!!waitUntilTime}
+                                  size="compact-md"
+                                  style={{ flexShrink: 0 }}
+                                  onClick={() => {
+                                    sendVerificationCode().catch(() => {
+                                      window.alert('Error sending verification code');
+                                    });
+                                  }}
+                                >
+                                  Reenviar
+                                </Button>
+                              </Group>
                             </Flex>
+                          </>
+                        ),
+                        [Page.CreatePin]: (
+                          <>
+                            <Text>Crea un pin de 4 dígitos para continuar</Text>
+                            <Flex align="center" direction="column" gap="sm">
+                              <PinInput
+                                length={4}
+                                type="number"
+                                value={registerPin}
+                                onChange={setRegisterPin}
+                              />
+                            </Flex>
+                          </>
+                        ),
+                        [Page.Success]: (
+                          <>
+                            <Text>¡Tu cuenta ha sido creada exitosamente!</Text>
                           </>
                         ),
                       } as Record<Page, React.ReactNode>
@@ -280,6 +573,37 @@ export function IngresarPage() {
                 </Stack>
               </motion.div>
             </AnimatePresence>
+          </Box>
+          <Box>
+            {alert ? (
+              <Alert
+                color={
+                  (
+                    {
+                      [AlertType.Info]: 'blue',
+                      [AlertType.Success]: 'green',
+                      [AlertType.Error]: 'red',
+                      [AlertType.Warning]: 'orange',
+                    } as Record<AlertType, AlertProps['color']>
+                  )[alert.type] || 'blue'
+                }
+                icon={
+                  (
+                    {
+                      [AlertType.Info]: <IconInfoCircle />,
+                      [AlertType.Success]: <IconCircleCheck />,
+                      [AlertType.Error]: <IconExclamationCircle />,
+                      [AlertType.Warning]: <IconAlertCircle />,
+                    } as Record<AlertType, React.ReactNode>
+                  )[alert.type] || <IconInfoCircle />
+                }
+                title={alert.title}
+                withCloseButton
+                onClose={() => setAlert(null)}
+              >
+                {alert.message}
+              </Alert>
+            ) : null}
           </Box>
           <Group w="100%" wrap="nowrap">
             <Button
@@ -290,7 +614,7 @@ export function IngresarPage() {
               }}
               loading={isLoading}
             >
-              Continuar
+              {nextButtonText}
             </Button>
           </Group>
         </Box>

@@ -15,7 +15,7 @@ export async function sendVerificationCode(phoneNumber: string) {
     .verifications.create({ to: phoneNumber, channel: 'sms' });
 }
 
-export async function verifyCode(phoneNumber: string, code: number) {
+export async function verifyCode(phoneNumber: string, code: string) {
   return twilioClient.verify.v2
     .services(process.env.TWILIO_VERIFY_SERVICE_SID as string)
     .verificationChecks.create({
