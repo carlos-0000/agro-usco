@@ -13,7 +13,7 @@ import {
   FaWhatsapp,
 } from 'react-icons/fa';
 import { Container, Text, Title } from '@mantine/core';
-import { GettingStartButton, SignInButton } from '@/components/home';
+import { GettingStartButton, SignInButton, RegisterButton } from '@/components/home';
 
 const covered = Covered_By_Your_Grace({
   subsets: ['latin'],
@@ -155,9 +155,7 @@ export const HomePage: React.FC = () => {
             <Text className="text-white text-lg md:text-xl mb-6 max-w-md animate-fadeIn">
               Disfruta de frutas y verduras frescas, cultivadas con amor por agricultores locales.
             </Text>
-            <Link href="/registro">
-              <GettingStartButton />
-            </Link>
+            <RegisterButton />
 
             {/* Imagen del agricultor solo para ESCRITORIO */}
             <div className="absolute bottom-0 right-0 mb-8 mr-8 hidden md:block" style={{ marginRight: '-20rem' }}>
@@ -194,11 +192,7 @@ export const HomePage: React.FC = () => {
             </Text>
 
             {/* Botón */}
-            <Link href="/ingresar">
-              <button className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-700">
-                Registrarme
-              </button>
-            </Link>
+            <RegisterButton />
           </div>
         </Container>
       </div>
@@ -267,9 +261,7 @@ export const HomePage: React.FC = () => {
                 contribuye al bienestar de las comunidades rurales.
               </Text>
             </div>
-            <Link href="/registro">
-              <GettingStartButton />
-            </Link>
+            <RegisterButton />
           </div>
         </div>
       </Container>
