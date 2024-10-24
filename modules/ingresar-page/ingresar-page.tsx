@@ -358,7 +358,7 @@ export function IngresarPage() {
                     setAlert({
                         type: AlertType.Error,
                         title: 'Error',
-                        message: 'Error al enviar el código de verificación. Intenta de nuevo.',
+                        message: 'Error al enviar el código de verificación. Ingresa un número de teléfono válido.',
                     });
                     setIsLoading(false);
                   })
