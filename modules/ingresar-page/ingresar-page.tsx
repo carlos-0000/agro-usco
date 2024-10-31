@@ -28,7 +28,6 @@ import {
   rem,
   Stack,
   Text,
-  TextInput,
   Title,
 } from '@mantine/core';
 import { SendVerificationCodeResponse } from '@/app/api/phones/[phone]/verification-code/route';
@@ -518,6 +517,7 @@ export function IngresarPage() {
                       {
                         [Page.Document]: (
                           <NumberInput
+                            allowDecimal={false}
                             label="Documento"
                             placeholder="1234567890"
                             required
