@@ -3479,6 +3479,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mantine/dates@npm:^7.14.0":
+  version: 7.14.0
+  resolution: "@mantine/dates@npm:7.14.0"
+  dependencies:
+    clsx: "npm:^2.1.1"
+  peerDependencies:
+    "@mantine/core": 7.14.0
+    "@mantine/hooks": 7.14.0
+    dayjs: ">=1.0.0"
+    react: ^18.x || ^19.x
+    react-dom: ^18.x || ^19.x
+  checksum: 10c0/438df05e69100ee29e5642ffb56e5ecca6bf1689f205c1f945505f79b58703eedf637513e96427cad7eb6908384b8c346b1785df9c7bd07e82874a21dc450f6b
+  languageName: node
+  linkType: hard
+
 "@mantine/hooks@npm:7.13.2":
   version: 7.13.2
   resolution: "@mantine/hooks@npm:7.13.2"
@@ -12527,6 +12542,7 @@ __metadata:
     "@babel/core": "npm:^7.24.7"
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.3.1"
     "@mantine/core": "npm:7.13.2"
+    "@mantine/dates": "npm:^7.14.0"
     "@mantine/hooks": "npm:7.13.2"
     "@next/bundle-analyzer": "npm:^14.2.4"
     "@next/eslint-plugin-next": "npm:^14.2.4"

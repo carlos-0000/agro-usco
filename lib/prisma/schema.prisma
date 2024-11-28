@@ -16,7 +16,7 @@ model UserType {
 model User {
   id               Int               @id @default(autoincrement())
   nationalId       String            @unique
-  phoneNumber      String?
+  phoneNumber      String?           @unique
   pinHash          String?
   userTypeId       Int?
   userType         UserType?         @relation(fields: [userTypeId], references: [id])
@@ -30,6 +30,8 @@ model User {
   accountLocks     AccountLock[]
   loginAttempts    LoginAttempt[]
   notifications    Notification[]
+  farms            Farm[]
+  products         Product[]         @relation("UserProducts")
 
   @@index([nationalId], name: "idx_national_id")
   @@index([phoneNumber], name: "idx_phone_number")
@@ -49,7 +51,7 @@ model SmsVerification {
   codeHash  String
   expiresAt DateTime
   purpose   VerificationPurpose
-  createdAt DateTime            @default(now()) @db.Timestamptz(3)
+  createdAt DateTime            @default(now())
 }
 
 enum VerificationPurpose {
@@ -91,4 +93,99 @@ enum NotificationType {
   ACCOUNT_TEMPORARILY_LOCKED
   ACCOUNT_PERMANENTLY_LOCKED
   PIN_CHANGED
+}
+
+model Category {
+  id            Int        @id @default(autoincrement())
+  name          String
+  parentId      Int?
+  parent        Category?  @relation("CategoryToSubcategories", fields: [parentId], references: [id])
+  subcategories Category[] @relation("CategoryToSubcategories")
+  products      Product[]
+}
+
+model CultivationType {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model UnitOfMeasure {
+  id           Int       @id @default(autoincrement())
+  name         String
+  abbreviation String?
+  products     Product[]
+}
+
+model Department {
+  id             Int            @id @default(autoincrement())
+  name           String
+  code           String         @db.Char(10)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  municipalities Municipality[]
+}
+
+model Municipality {
+  id           Int        @id @default(autoincrement())
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  name         String
+  code         String     @db.Char(10)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  farms        Farm[]
+}
+
+model Farm {
+  id             Int          @id @default(autoincrement())
+  ownerId        Int
+  owner          User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name           String
+  municipalityId Int
+  municipality   Municipality @relation(fields: [municipalityId], references: [id])
+  address        String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  products       Product[]
+}
+
+model Product {
+  id                Int             @id @default(autoincrement())
+  sellerId          Int
+  seller            User            @relation("UserProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+  farmId            Int
+  farm              Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  name              String
+  categoryId        Int
+  category          Category        @relation(fields: [categoryId], references: [id])
+  cultivationTypeId Int
+  cultivationType   CultivationType @relation(fields: [cultivationTypeId], references: [id])
+  description       String?
+  unitOfMeasureId   Int
+  unitOfMeasure     UnitOfMeasure   @relation(fields: [unitOfMeasureId], references: [id])
+  stockAvailable    Int             @default(0)
+  availableDate     DateTime
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  priceRanges       PriceRange[]
+  productPhotos     ProductPhoto[]
+}
+
+model PriceRange {
+  id          Int     @id @default(autoincrement())
+  productId   Int
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  minQuantity Int
+  unitPrice   Decimal
+  totalPrice  Decimal
+}
+
+model ProductPhoto {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url        String
+  photoOrder Int
+  createdAt  DateTime @default(now())
 }

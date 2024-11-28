@@ -13,7 +13,8 @@ import {
   FaWhatsapp,
 } from 'react-icons/fa';
 import { Container, Text, Title } from '@mantine/core';
-import { GettingStartButton, SignInButton, RegisterButton } from '@/components/home';
+import { useSession, signOut } from 'next-auth/react';
+import {  SignInButton, RegisterButton } from '@/components/home';
 
 const covered = Covered_By_Your_Grace({
   subsets: ['latin'],
@@ -23,6 +24,11 @@ const covered = Covered_By_Your_Grace({
 export const HomePage: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
+  React.useEffect(() => {
+      // Limpia las cookies y redirige al usuario
+      signOut({ callbackUrl: '/ingresar' });
+
+  }, []);
   return (
     <>
       <header className="bg-white shadow-md py-4">
@@ -134,7 +140,7 @@ export const HomePage: React.FC = () => {
 
             {/* Botón de iniciar sesión (móvil) */}
             <div className="mt-4">
-              <SignInButton />
+              <SignInButton/>
             </div>
           </div>
         )}
@@ -158,13 +164,13 @@ export const HomePage: React.FC = () => {
             <RegisterButton />
 
             {/* Imagen del agricultor solo para ESCRITORIO */}
-            <div className="absolute bottom-0 right-0 mb-8 mr-8 hidden md:block" style={{ marginRight: '-20rem' }}>
-              <img
-                src="/farmer-illustration.png"
-                alt="Agricultor"
-                className="w-80 md:w-[50rem] h-auto animate-fadeIn"
-              />
-            </div>
+            {/*<div className="absolute bottom-0 right-0 mb-8 mr-8 hidden md:block" style={{ marginRight: '-20rem' }}>*/}
+            {/*  <img*/}
+            {/*    src="/farmer-illustration.png"*/}
+            {/*    alt="Agricultor"*/}
+            {/*    className="w-80 md:w-[50rem] h-auto animate-fadeIn"*/}
+            {/*  />*/}
+            {/*</div>*/}
           </div>
 
           {/* Sección para MÓVIL */}

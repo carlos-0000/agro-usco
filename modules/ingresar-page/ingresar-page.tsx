@@ -37,7 +37,6 @@ import classes from './ingresar-page.module.css';
 const ErrorMessages: Record<string, string> = {
   CredentialsSignin: 'Credenciales incorrectas. Verifica tu documento y pin e intenta de nuevo.',
 };
-
 enum Page {
   Document,
   Pin,

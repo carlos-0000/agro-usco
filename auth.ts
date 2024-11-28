@@ -19,6 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       },
       authorize: async (credentials) => {
+        console.log('credentials', credentials);
         if (!credentials.nationalId || !credentials.pin) {
           console.error('Missing credentials');
           return null;
@@ -66,7 +67,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async redirect({ baseUrl }) {
+    async redirect({ url, baseUrl }) {
+      // Permite quedarse en /ingresar
+      if (url === `${baseUrl}/ingresar`) {
+        return url;
+      }
+
+      // Redirige a /plaza como predeterminado
       return `${baseUrl}/plaza`;
     },
   },

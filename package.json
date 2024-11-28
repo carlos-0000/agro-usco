@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@mantine/core": "7.13.2",
+    "@mantine/dates": "^7.14.0",
     "@mantine/hooks": "7.13.2",
     "@next/bundle-analyzer": "^14.2.4",
     "@prisma/client": "5.21.0",
