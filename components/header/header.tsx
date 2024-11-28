@@ -30,13 +30,19 @@ import { useRouter } from 'next/navigation';
 
 const tabs = [
     { label: 'Todos', url: '/plaza' },
-    { label: 'Granos', url: '/granos' },
-    { label: 'Frutas', url: '/frutas' },
-    { label: 'Verduras', url: '/verduras' },
-    { label: 'Tubérculos', url: '/tubérculos' },
+    { label: 'Granos', url: '/plaza/granos' },
+    { label: 'Frutas', url: '/plaza/frutas' },
+    { label: 'Verduras', url: '/plaza/verduras' },
+    { label: 'Tubérculos', url: '/plaza/tuberculos' },
   ];
 
 export const Header = () => {
+
+    const getCurrenByPath = () => {
+        const path = window.location.pathname;
+        const currentTab = tabs.find((tab) => tab.url === path);
+        return currentTab ? currentTab.label : 'Todos';
+    };
 
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -48,6 +54,8 @@ export const Header = () => {
 
     useEffect(() => {
         api.get('/categories').then(({ data }) => {
+            console.log('categories', data);
+
             setCategories(data.categories);
             setLoading(false);
         }).catch((error) => {
@@ -65,10 +73,10 @@ export const Header = () => {
             key={tab.label} // Usar `tab.label` como clave única
             onClick={() => push(tab.url)} // Navegar al `url` definido en el objeto
         >
-            {tab.label} 
+            {tab.label}
         </Tabs.Tab>
     ));
-    
+
 
     return (
         <div className={classes.header}>

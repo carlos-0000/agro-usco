@@ -74,7 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       // Redirige a /plaza como predeterminado
-      return `${baseUrl}/plaza`;
+      return `${baseUrl}/`;
     },
   },
   pages: {

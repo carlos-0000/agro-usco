@@ -1,37 +1,28 @@
-// components/ProductGallery.tsx
-
 import React from 'react';
 import { SimpleGrid } from '@mantine/core';
 import ProductCard from './ProductCard';
 
 interface Product {
-  id: number;
-  name: string;
-  image: string;
-  description: string;
-  price: number;
-  badge?: string;
+    id: number;
+    // ... otros campos necesarios
 }
 
 interface ProductGalleryProps {
-  products: Product[];
+    products: Product[];
 }
 
 const ProductGallery: React.FC<ProductGalleryProps> = ({ products }) => {
-  return (
-    <SimpleGrid
-      cols={3}
-      spacing="lg"
-      breakpoints={[
-        { maxWidth: 'md', cols: 2, spacing: 'md' },
-        { maxWidth: 'sm', cols: 1, spacing: 'sm' },
-      ]}
-    >
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </SimpleGrid>
-  );
+    return (
+        <SimpleGrid
+            type="container"
+            cols={3}
+            spacing={{ base: 10, '300px': 'xl' }}
+        >
+            {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+            ))}
+        </SimpleGrid>
+    );
 };
 
 export default ProductGallery;

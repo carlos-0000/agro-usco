@@ -22,13 +22,21 @@ const covered = Covered_By_Your_Grace({
 });
 
 export const HomePage: React.FC = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [redirected, setRedirected] = React.useState(false);
+  const { data: session, status } = useSession();
+
 
   React.useEffect(() => {
-      // Limpia las cookies y redirige al usuario
-      signOut({ callbackUrl: '/ingresar' });
+    console.log('Status:', status);
+    // Evita ciclos infinitos
+    if (status === 'authenticated' && !redirected) {
+      console.log('Redirigiendo a la página de inicio...');
+      signOut({ callbackUrl: '/' });
+      setRedirected(true); // Marca que ya se ejecutó la redirección
+    }
+  }, [status, redirected]);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-  }, []);
   return (
     <>
       <header className="bg-white shadow-md py-4">
