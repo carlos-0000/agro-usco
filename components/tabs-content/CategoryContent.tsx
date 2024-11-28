@@ -38,8 +38,12 @@ const CategoryContent: React.FC<{ selectedCategory: number }> = ({ selectedCateg
         console.log('endpoint', endpoint);
 
         const { data } = await api.get(endpoint);
-        console.log('data', data);
-        setProducts(data.products || []); // Suponiendo que la respuesta tiene un array de productos
+
+        if (!data.products || data.products.length === 0) {
+            throw new Error('No se encontraron productos para esta categoría');
+        } // Si tu API devuelve un array vacío
+
+        setProducts(data.products); // Suponiendo que la respuesta tiene un array de productos
         setCategoryName(
             selectedCategory === 0
                 ? 'Todas'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
@@ -62,6 +63,8 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+
+    console.log(product);
     const router = useRouter();
     const { cartItems, addToCart } = useContext(CartContext)!;
 
@@ -147,6 +150,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 padding="lg"
                 radius="md"
                 withBorder
+                // style={{
+                //     minWidth: '300px', // Tamaño mínimo para las tarjetas
+                //     maxWidth: '400px', // Tamaño máximo opcional
+                //     margin: 'auto', // Centrar las tarjetas en su contenedor
+                // }}
                 // onClick={handleCardClick}
                 // style={{ cursor: 'pointer' }}
             >
@@ -156,16 +164,30 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         <Carousel withIndicators height={242}>
                             {product.productPhotos.map((photo) => (
                                 <Carousel.Slide key={photo.id}>
-                                    <Image key={photo.id} src={photo.url} height={160} alt={product.name} />
+                                    <Image
+                                        key={photo.id}
+                                        src={photo.url}
+                                        alt={product.name}
+                                        style={{
+                                            width: '245px', // Ancho fijo
+                                            height: '245px', // Alto fijo
+                                            objectFit: 'cover', // Para asegurar que la imagen se vea correctamente
+                                            margin: '0 auto', // Centrar horizontalmente
+                                        }}
+                                    />
                                 </Carousel.Slide>
-
                             ))}
                         </Carousel>
                     ) : (
                         <Image
                             src={product.productPhotos[0]?.url || '/images/placeholder.png'}
-                            height={160}
                             alt={product.name}
+                            style={{
+                                width: '245px', // Ancho fijo
+                                height: '245px', // Alto fijo
+                                objectFit: 'cover', // Ajusta la imagen para que no se deforme
+                                margin: '0 auto', // Centrar horizontalmente
+                            }}
                         />
                     )}
                 </Card.Section>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -100,7 +101,15 @@ export const Header = () => {
                             onOpen={() => setUserMenuOpened(true)}
                             withinPortal
                         >
-
+                            <Button
+                                className={classes.userButton}
+                                onClick={() => push('/vender')}
+                                variant="link"
+                                color="green"
+                                size={'sm'}
+                            >
+                                Vender producto
+                            </Button>
                             <Button
                                 className={classes.userButton}
                                 onClick={() => signOut()}
@@ -110,14 +119,14 @@ export const Header = () => {
                             >
                                 Cerrar sesión
                             </Button>
-                            <Menu.Dropdown>
-                                <Menu.Item
-                                    icon={<IconLogout size={rem(16)} stroke={1.5} />}
-                                    onClick={() => signOut()}
-                                >
-                                    Cerrar sesión
-                                </Menu.Item>
-                            </Menu.Dropdown>
+                            {/*<Menu.Dropdown>*/}
+                            {/*    <Menu.Item*/}
+                            {/*        icon={<IconLogout size={rem(16)} stroke={1.5} />}*/}
+                            {/*        onClick={() => signOut()}*/}
+                            {/*    >*/}
+                            {/*        Cerrar sesión*/}
+                            {/*    </Menu.Item>*/}
+                            {/*</Menu.Dropdown>*/}
 
                         </Menu>
 

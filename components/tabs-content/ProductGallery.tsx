@@ -1,5 +1,5 @@
+// @ts-nocheck
 import React from 'react';
-import { SimpleGrid } from '@mantine/core';
 import ProductCard from './ProductCard';
 
 interface Product {
@@ -12,16 +12,34 @@ interface ProductGalleryProps {
 }
 
 const ProductGallery: React.FC<ProductGalleryProps> = ({ products }) => {
+    console.log('productsssss', products);
     return (
-        <SimpleGrid
-            type="container"
-            cols={3}
-            spacing={{ base: 10, '300px': 'xl' }}
+        <div
+            style={{
+                display: 'grid',
+                gap: '48px',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                padding: '20px',
+                marginTop: '2rem',
+            }}
         >
             {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <div
+                    key={product.id}
+                    style={{
+                        minWidth: '290px',
+                        maxWidth: '290px',
+                        margin: 'auto',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        borderRadius: '8px',
+                        backgroundColor: '#fff',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <ProductCard product={product} />
+                </div>
             ))}
-        </SimpleGrid>
+        </div>
     );
 };
 

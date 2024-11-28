@@ -8,10 +8,11 @@ export const GET = async (
     { params }: { params: { id: string } }
 ) => {
     try {
+        console.log('params', params);
         const { id } = params;
 
-        const product = await prisma.product.findUnique({
-            where: { id: parseInt(id) },
+        const product = await prisma.product.findMany({
+            where: { categoryId: parseInt(id) },
             include: {
                 seller: true,
                 farm: true,
@@ -29,8 +30,9 @@ export const GET = async (
                 { status: 404 }
             );
         }
+        console.log('product', product);
 
-        return NextResponse.json({ product });
+        return NextResponse.json({ products: product });
     } catch (error) {
         console.error(error);
         return NextResponse.json(

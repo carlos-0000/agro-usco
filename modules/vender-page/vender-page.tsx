@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import React, { useEffect } from 'react';
@@ -55,7 +56,6 @@ const variants = {
     exit: (d: Direction) => ({ x: d === Direction.Next ? -300 : 300, opacity: 0 }),
 };
 
-// Definimos la interfaz para las fotos del producto
 interface FotoProducto {
     url: string;
     photoOrder: number;
@@ -71,8 +71,8 @@ export function VenderPage() {
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [isUploading, setIsUploading] = React.useState(false);
+    const [isPublished, setIsPublished] = React.useState(false);
 
-    // State variables for the form data
     const [nombreProducto, setNombreProducto] = React.useState('');
     const [descripcionProducto, setDescripcionProducto] = React.useState('');
     const [fotosProducto, setFotosProducto] = React.useState<FotoProducto[]>([]);
@@ -87,7 +87,6 @@ export function VenderPage() {
     const [nombreFinca, setNombreFinca] = React.useState('');
     const [direccionExacta, setDireccionExacta] = React.useState('');
 
-    // IDs seleccionados
     const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>('');
     const [selectedCultivationTypeId, setSelectedCultivationTypeId] = React.useState<string>('');
     const [selectedUnitId, setSelectedUnitId] = React.useState<string>('');
@@ -95,7 +94,6 @@ export function VenderPage() {
     const [selectedDepartmentId, setSelectedDepartmentId] = React.useState<string>('');
     const [selectedMunicipalityId, setSelectedMunicipalityId] = React.useState<string>('');
 
-    // Data arrays
     const [categories, setCategories] = React.useState<{ value: string; label: string }[]>([]);
     const [cultivationTypes, setCultivationTypes] = React.useState<{ value: string; label: string }[]>([]);
     const [unitsOfMeasure, setUnitsOfMeasure] = React.useState<{ value: string; label: string }[]>([]);
@@ -133,7 +131,6 @@ export function VenderPage() {
     );
 
     useEffect(() => {
-        // Obtener categorías
         api.get('/categories')
             .then(({ data }) => {
                 const categoryOptions = data.categories.map((category: any) => ({
@@ -146,7 +143,6 @@ export function VenderPage() {
                 console.error('Error fetching categories:', error);
             });
 
-        // Obtener tipos de cultivo
         api.get('/cultivation-types')
             .then(({ data }) => {
                 const cultivationTypeOptions = data.cultivationTypes.map((type: any) => ({
@@ -159,7 +155,6 @@ export function VenderPage() {
                 console.error('Error fetching cultivation types:', error);
             });
 
-        // Obtener unidades de medida
         api.get('/units-of-measure')
             .then(({ data }) => {
                 const unitsOptions = data.unitsOfMeasure.map((unit: any) => ({
@@ -172,7 +167,6 @@ export function VenderPage() {
                 console.error('Error fetching units of measure:', error);
             });
 
-        // Obtener fincas del usuario
         api.get('/farms')
             .then(({ data }) => {
                 const farmOptions = data.farms.map((farm: any) => ({
@@ -185,7 +179,6 @@ export function VenderPage() {
                 console.error('Error fetching farms:', error);
             });
 
-        // Obtener departamentos
         api.get('/locations/departments')
             .then(({ data }) => {
                 const departmentOptions = data.departments.map((dept: any) => ({
@@ -199,7 +192,6 @@ export function VenderPage() {
             });
     }, []);
 
-    // Obtener municipios cuando se selecciona un departamento
     React.useEffect(() => {
         if (selectedDepartmentId) {
             api
@@ -220,11 +212,10 @@ export function VenderPage() {
         }
     }, [selectedDepartmentId]);
 
-    // Función para subir imágenes a Cloudinary
     const uploadImage = async (file: File) => {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'mi_preset_sin_firma'); // Reemplaza con tu preset
+        formData.append('upload_preset', 'mi_preset_sin_firma');
 
         try {
             const response = await fetch('https://api.cloudinary.com/v1_1/dnwlgvu15/image/upload', {
@@ -246,9 +237,9 @@ export function VenderPage() {
 
     const handleSubmit = () => {
         const nationalId = localStorage.getItem('nationalId');
-        console.log('nationalId', nationalId);
+
         const productData = {
-            nationalId,
+            nationalId: nationalId,
             name: nombreProducto,
             categoryId: parseInt(selectedCategoryId, 10),
             cultivationTypeId: parseInt(selectedCultivationTypeId, 10),
@@ -276,20 +267,17 @@ export function VenderPage() {
             })),
         };
 
-        // Enviar los datos al backend
         api
             .post('/products', productData)
             .then((response) => {
-                // Manejar respuesta exitosa
                 setAlert({
                     type: 'success',
                     title: 'Producto publicado',
                     message: 'El producto se ha publicado exitosamente.',
                 });
-                // Resetear el formulario si es necesario
+                setIsPublished(true);
             })
             .catch((error) => {
-                // Manejar errores
                 setAlert({
                     type: 'error',
                     title: 'Error',
@@ -299,10 +287,12 @@ export function VenderPage() {
     };
 
     const nextButtonAction = React.useCallback(() => {
+        if (isPublished) {
+            return;
+        }
         (
             {
                 [Paso.InformacionBasica]() {
-                    // Validations
                     if (!nombreProducto.trim() || !selectedCategoryId || !selectedCultivationTypeId) {
                         setAlert({
                             type: 'error',
@@ -314,7 +304,6 @@ export function VenderPage() {
                     setPaso([Paso.DescripcionYFotos, Direction.Next]);
                 },
                 [Paso.DescripcionYFotos]() {
-                    // Validations
                     if (!descripcionProducto.trim()) {
                         setAlert({
                             type: 'error',
@@ -382,12 +371,9 @@ export function VenderPage() {
                     setPaso([Paso.RevisionYConfirmacion, Direction.Next]);
                 },
                 [Paso.RevisionYConfirmacion]() {
-                    // Simulate publishing the product
                     setIsLoading(true);
                     handleSubmit();
                     setIsLoading(false);
-                    // Reset form
-                    // ... resetear los estados si es necesario
                 },
             } as Record<Paso, () => void>
         )[paso]();
@@ -408,14 +394,17 @@ export function VenderPage() {
         selectedDepartmentId,
         selectedMunicipalityId,
         direccionExacta,
+        isPublished,
+        isLoading,
     ]);
 
     const backButtonAction = React.useCallback(() => {
+        if (isPublished) {
+            return;
+        }
         (
             {
-                [Paso.InformacionBasica]() {
-                    // Can't go back
-                },
+                [Paso.InformacionBasica]() {},
                 [Paso.DescripcionYFotos]() {
                     setPaso([Paso.InformacionBasica, Direction.Back]);
                 },
@@ -433,7 +422,7 @@ export function VenderPage() {
                 },
             } as Record<Paso, () => void>
         )[paso]();
-    }, [paso]);
+    }, [paso, isPublished]);
 
     React.useEffect(() => {
         setAlert(null);
@@ -446,7 +435,7 @@ export function VenderPage() {
                 Vender Producto
             </Title>
             <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
-                {paso !== Paso.InformacionBasica && (
+                {paso !== Paso.InformacionBasica && !isPublished && (
                     <Button
                         leftSection={<IconArrowLeft size={18} />}
                         variant="subtle"
@@ -493,6 +482,7 @@ export function VenderPage() {
                                                     value={nombreProducto}
                                                     onChange={(e) => setNombreProducto(e.target.value)}
                                                     maxLength={100}
+                                                    disabled={isPublished}
                                                 />
                                             </Input.Wrapper>
                                             <Select
@@ -502,6 +492,7 @@ export function VenderPage() {
                                                 data={categories}
                                                 value={selectedCategoryId}
                                                 onChange={(value) => setSelectedCategoryId(value)}
+                                                disabled={isPublished}
                                             />
                                             <Select
                                                 label="Tipo de Cultivo"
@@ -510,6 +501,7 @@ export function VenderPage() {
                                                 data={cultivationTypes}
                                                 value={selectedCultivationTypeId}
                                                 onChange={(value) => setSelectedCultivationTypeId(value)}
+                                                disabled={isPublished}
                                             />
                                         </>
                                     ),
@@ -527,6 +519,7 @@ export function VenderPage() {
                                                 maxLength={500}
                                                 value={descripcionProducto}
                                                 onChange={(e) => setDescripcionProducto(e.target.value)}
+                                                disabled={isPublished}
                                             />
                                             <FileButton
                                                 onChange={(files) => {
@@ -544,7 +537,10 @@ export function VenderPage() {
                                                         for (const file of files) {
                                                             try {
                                                                 const url = await uploadImage(file);
-                                                                setFotosProducto((prev) => [...prev, { url, photoOrder: prev.length + 1 }]);
+                                                                setFotosProducto((prev) => [
+                                                                    ...prev,
+                                                                    { url, photoOrder: prev.length + 1 },
+                                                                ]);
                                                             } catch (error) {
                                                                 setAlert({
                                                                     type: 'error',
@@ -560,7 +556,7 @@ export function VenderPage() {
                                                 }}
                                                 accept="image/png,image/jpeg"
                                                 multiple
-                                                disabled={fotosProducto.length >= 3 || isUploading}
+                                                disabled={fotosProducto.length >= 3 || isUploading || isPublished}
                                             >
                                                 {(props) => (
                                                     <Button {...props}>
@@ -581,19 +577,21 @@ export function VenderPage() {
                                                                 height={100}
                                                                 withPlaceholder
                                                             />
-                                                            <Button
-                                                                size="xs"
-                                                                color="red"
-                                                                variant="filled"
-                                                                pos="absolute"
-                                                                top={0}
-                                                                right={0}
-                                                                onClick={() => {
-                                                                    setFotosProducto(fotosProducto.filter((_, i) => i !== index));
-                                                                }}
-                                                            >
-                                                                <IconTrash size={16} />
-                                                            </Button>
+                                                            {!isPublished && (
+                                                                <Button
+                                                                    size="xs"
+                                                                    color="red"
+                                                                    variant="filled"
+                                                                    pos="absolute"
+                                                                    top={0}
+                                                                    right={0}
+                                                                    onClick={() => {
+                                                                        setFotosProducto(fotosProducto.filter((_, i) => i !== index));
+                                                                    }}
+                                                                >
+                                                                    <IconTrash size={16} />
+                                                                </Button>
+                                                            )}
                                                         </Box>
                                                     ))}
                                                 </Group>
@@ -612,6 +610,7 @@ export function VenderPage() {
                                                 data={unitsOfMeasure}
                                                 value={selectedUnitId}
                                                 onChange={(value) => setSelectedUnitId(value)}
+                                                disabled={isPublished}
                                             />
                                             <NumberInput
                                                 label="Stock Disponible"
@@ -620,6 +619,7 @@ export function VenderPage() {
                                                 min={1}
                                                 value={stockDisponible}
                                                 onChange={(value) => setStockDisponible(value)}
+                                                disabled={isPublished}
                                             />
                                             <DateInput
                                                 label="Fecha de Disponibilidad"
@@ -627,6 +627,7 @@ export function VenderPage() {
                                                 required
                                                 value={fechaDisponibilidad}
                                                 onChange={(value) => setFechaDisponibilidad(value)}
+                                                disabled={isPublished}
                                             />
                                         </>
                                     ),
@@ -641,6 +642,7 @@ export function VenderPage() {
                                                 min={1}
                                                 value={cantidadMinima}
                                                 onChange={(value) => setCantidadMinima(value)}
+                                                disabled={isPublished}
                                             />
                                             <NumberInput
                                                 label="Precio por Unidad"
@@ -649,34 +651,38 @@ export function VenderPage() {
                                                 precision={2}
                                                 value={precioPorUnidad}
                                                 onChange={(value) => setPrecioPorUnidad(value)}
+                                                disabled={isPublished}
                                             />
-                                            <Button
-                                                leftSection={<IconPlus size={16} />}
-                                                onClick={() => {
-                                                    if (!cantidadMinima || !precioPorUnidad) {
-                                                        setAlert({
-                                                            type: 'error',
-                                                            title: 'Error',
-                                                            message:
-                                                                'Por favor ingrese la cantidad mínima y el precio por unidad.',
-                                                        });
-                                                        return;
-                                                    }
-                                                    const precioTotalCalc = (cantidadMinima || 0) * (precioPorUnidad || 0);
-                                                    setRangosPrecios([
-                                                        ...rangosPrecios,
-                                                        {
-                                                            cantidadMinima,
-                                                            precioPorUnidad,
-                                                            precioTotal: precioTotalCalc,
-                                                        },
-                                                    ]);
-                                                    setCantidadMinima(undefined);
-                                                    setPrecioPorUnidad(undefined);
-                                                }}
-                                            >
-                                                Agregar Rango de Precio
-                                            </Button>
+                                            {!isPublished && (
+                                                <Button
+                                                    leftSection={<IconPlus size={16} />}
+                                                    onClick={() => {
+                                                        if (!cantidadMinima || !precioPorUnidad) {
+                                                            setAlert({
+                                                                type: 'error',
+                                                                title: 'Error',
+                                                                message:
+                                                                    'Por favor ingrese la cantidad mínima y el precio por unidad.',
+                                                            });
+                                                            return;
+                                                        }
+                                                        const precioTotalCalc =
+                                                            (cantidadMinima || 0) * (precioPorUnidad || 0);
+                                                        setRangosPrecios([
+                                                            ...rangosPrecios,
+                                                            {
+                                                                cantidadMinima,
+                                                                precioPorUnidad,
+                                                                precioTotal: precioTotalCalc,
+                                                            },
+                                                        ]);
+                                                        setCantidadMinima(undefined);
+                                                        setPrecioPorUnidad(undefined);
+                                                    }}
+                                                >
+                                                    Agregar Rango de Precio
+                                                </Button>
+                                            )}
                                             {rangosPrecios.length > 0 && (
                                                 <Stack>
                                                     <Text size="md" weight="bold">
@@ -689,15 +695,19 @@ export function VenderPage() {
                                                                 {rango.precioPorUnidad.toFixed(2)}, Precio Total:{' '}
                                                                 {rango.precioTotal.toFixed(2)}
                                                             </Text>
-                                                            <Button
-                                                                variant="subtle"
-                                                                color="red"
-                                                                onClick={() => {
-                                                                    setRangosPrecios(rangosPrecios.filter((_, i) => i !== index));
-                                                                }}
-                                                            >
-                                                                <IconTrash size={16} />
-                                                            </Button>
+                                                            {!isPublished && (
+                                                                <Button
+                                                                    variant="subtle"
+                                                                    color="red"
+                                                                    onClick={() => {
+                                                                        setRangosPrecios(
+                                                                            rangosPrecios.filter((_, i) => i !== index)
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <IconTrash size={16} />
+                                                                </Button>
+                                                            )}
                                                         </Group>
                                                     ))}
                                                 </Stack>
@@ -715,12 +725,15 @@ export function VenderPage() {
                                                 data={farms}
                                                 value={fincaSeleccionada}
                                                 onChange={(value) => setFincaSeleccionada(value)}
-                                                disabled={crearNuevaFinca}
+                                                disabled={crearNuevaFinca || isPublished}
                                             />
                                             <Checkbox
                                                 label="Crear Nueva Finca"
                                                 checked={crearNuevaFinca}
-                                                onChange={(event) => setCrearNuevaFinca(event.currentTarget.checked)}
+                                                onChange={(event) =>
+                                                    setCrearNuevaFinca(event.currentTarget.checked)
+                                                }
+                                                disabled={isPublished}
                                             />
                                             {crearNuevaFinca && (
                                                 <>
@@ -729,6 +742,7 @@ export function VenderPage() {
                                                             value={nombreFinca}
                                                             onChange={(e) => setNombreFinca(e.target.value)}
                                                             maxLength={100}
+                                                            disabled={isPublished}
                                                         />
                                                     </Input.Wrapper>
                                                     <Select
@@ -741,6 +755,7 @@ export function VenderPage() {
                                                             setSelectedDepartmentId(value);
                                                             setSelectedMunicipalityId('');
                                                         }}
+                                                        disabled={isPublished}
                                                     />
                                                     <Select
                                                         label="Municipio"
@@ -749,13 +764,14 @@ export function VenderPage() {
                                                         data={municipalities}
                                                         value={selectedMunicipalityId}
                                                         onChange={(value) => setSelectedMunicipalityId(value)}
-                                                        disabled={!selectedDepartmentId}
+                                                        disabled={!selectedDepartmentId || isPublished}
                                                     />
                                                     <Input.Wrapper label="Dirección Exacta" required>
                                                         <Input
                                                             value={direccionExacta}
                                                             onChange={(e) => setDireccionExacta(e.target.value)}
                                                             maxLength={200}
+                                                            disabled={isPublished}
                                                         />
                                                     </Input.Wrapper>
                                                 </>
@@ -776,7 +792,11 @@ export function VenderPage() {
                                             </Text>
                                             <Text>
                                                 <strong>Tipo de Cultivo:</strong>{' '}
-                                                {cultivationTypes.find((type) => type.value === selectedCultivationTypeId)?.label}
+                                                {
+                                                    cultivationTypes.find(
+                                                        (type) => type.value === selectedCultivationTypeId
+                                                    )?.label
+                                                }
                                             </Text>
                                             <Text>
                                                 <strong>Descripción:</strong> {descripcionProducto}
@@ -819,9 +839,13 @@ export function VenderPage() {
                                                 <strong>Finca Seleccionada:</strong>{' '}
                                                 {crearNuevaFinca
                                                     ? `Nueva Finca: ${nombreFinca}, ${
-                                                        departments.find((dept) => dept.value === selectedDepartmentId)?.label
+                                                        departments.find(
+                                                            (dept) => dept.value === selectedDepartmentId
+                                                        )?.label
                                                     }, ${
-                                                        municipalities.find((mun) => mun.value === selectedMunicipalityId)?.label
+                                                        municipalities.find(
+                                                            (mun) => mun.value === selectedMunicipalityId
+                                                        )?.label
                                                     }, ${direccionExacta}`
                                                     : farms.find((farm) => farm.value === fincaSeleccionada)?.label}
                                             </Text>
@@ -833,16 +857,26 @@ export function VenderPage() {
                     </motion.div>
                 </AnimatePresence>
                 <Group position="right" mt="md">
-                    <Button
-                        rightSection={<IconArrowRight size={16} />}
-                        onClick={() => {
-                            nextButtonAction();
-                        }}
-                        loading={isLoading || isUploading}
-                        disabled={isUploading}
-                    >
-                        {nextButtonText}
-                    </Button>
+                    {isPublished ? (
+                        <Button
+                            onClick={() => {
+                                navigation.push('/plaza');
+                            }}
+                        >
+                            Ver Productos
+                        </Button>
+                    ) : (
+                        <Button
+                            rightSection={<IconArrowRight size={16} />}
+                            onClick={() => {
+                                nextButtonAction();
+                            }}
+                            loading={isLoading || isUploading}
+                            disabled={isUploading || isLoading}
+                        >
+                            {nextButtonText}
+                        </Button>
+                    )}
                 </Group>
             </Paper>
         </Container>
