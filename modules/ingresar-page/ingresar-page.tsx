@@ -248,7 +248,8 @@ export function IngresarPage() {
                     message: ErrorMessages[response.error],
                 });
                 } else {
-                navigation.replace('/plaza');
+                    localStorage.setItem('nationalId', document);
+                    navigation.replace('/plaza');
                 }
             })
             .catch((r) => console.log(r))

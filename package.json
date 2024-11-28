@@ -22,6 +22,7 @@
     "schema": "lib/prisma/schema.prisma"
   },
   "dependencies": {
+    "@mantine/carousel": "^7.14.3",
     "@mantine/core": "^7.14.2",
     "@mantine/dates": "^7.14.0",
     "@mantine/hooks": "^7.14.2",
@@ -30,10 +31,12 @@
     "@tabler/icons-react": "^3.6.0",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
+    "embla-carousel-react": "^7.1.0",
     "framer-motion": "^11.11.9",
     "lucide-react": "^0.453.0",
     "next": "14.2.4",
     "next-auth": "^5.0.0-beta.25",
+    "next-cloudinary": "^6.16.0",
     "prisma": "^5.21.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",

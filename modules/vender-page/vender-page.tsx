@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { useRouter as useNavigation } from 'next/navigation';
 import {
     IconAlertCircle,
@@ -31,9 +31,9 @@ import {
     Image,
     Input,
 } from '@mantine/core';
-import {DateInput, DatePickerInput} from '@mantine/dates';
+import { DateInput } from '@mantine/dates';
 import classes from './vender-page.module.css';
-import {api} from "@/lib/api";
+import { api } from '@/lib/api';
 
 enum Paso {
     InformacionBasica,
@@ -55,9 +55,13 @@ const variants = {
     exit: (d: Direction) => ({ x: d === Direction.Next ? -300 : 300, opacity: 0 }),
 };
 
+// Definimos la interfaz para las fotos del producto
+interface FotoProducto {
+    url: string;
+    photoOrder: number;
+}
+
 export function VenderPage() {
-
-
     const navigation = useNavigation();
 
     const [[paso, direction], setPaso] = React.useState<[Paso, Direction]>([
@@ -66,41 +70,38 @@ export function VenderPage() {
     ]);
 
     const [isLoading, setIsLoading] = React.useState(false);
+    const [isUploading, setIsUploading] = React.useState(false);
 
     // State variables for the form data
     const [nombreProducto, setNombreProducto] = React.useState('');
-    const [categoriaProducto, setCategoriaProducto] = React.useState('');
-    const [tipoCultivo, setTipoCultivo] = React.useState('');
-
     const [descripcionProducto, setDescripcionProducto] = React.useState('');
-    const [fotosProducto, setFotosProducto] = React.useState<File[]>([]);
-
-    const [unidadMedida, setUnidadMedida] = React.useState('');
+    const [fotosProducto, setFotosProducto] = React.useState<FotoProducto[]>([]);
     const [stockDisponible, setStockDisponible] = React.useState<number | undefined>();
     const [fechaDisponibilidad, setFechaDisponibilidad] = React.useState<Date | null>(null);
-
     const [rangosPrecios, setRangosPrecios] = React.useState<
         { cantidadMinima: number; precioPorUnidad: number; precioTotal: number }[]
     >([]);
-
     const [cantidadMinima, setCantidadMinima] = React.useState<number | undefined>();
     const [precioPorUnidad, setPrecioPorUnidad] = React.useState<number | undefined>();
-
-    const [fincaSeleccionada, setFincaSeleccionada] = React.useState('');
     const [crearNuevaFinca, setCrearNuevaFinca] = React.useState(false);
     const [nombreFinca, setNombreFinca] = React.useState('');
-    const [departamento, setDepartamento] = React.useState('');
-    const [ciudad, setCiudad] = React.useState('');
     const [direccionExacta, setDireccionExacta] = React.useState('');
 
-    const [categories, setCategories] = React.useState<{ value: string; label: string }[]>([]);
-    const [cultivationTypes, setCultivationTypes] = React.useState<{ value: string; label: string }[]>([]);
+    // IDs seleccionados
     const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>('');
     const [selectedCultivationTypeId, setSelectedCultivationTypeId] = React.useState<string>('');
-
-    // Estado para unidades de medida
-    const [unitsOfMeasure, setUnitsOfMeasure] = React.useState<{ value: string; label: string }[]>([]);
     const [selectedUnitId, setSelectedUnitId] = React.useState<string>('');
+    const [fincaSeleccionada, setFincaSeleccionada] = React.useState<string>('');
+    const [selectedDepartmentId, setSelectedDepartmentId] = React.useState<string>('');
+    const [selectedMunicipalityId, setSelectedMunicipalityId] = React.useState<string>('');
+
+    // Data arrays
+    const [categories, setCategories] = React.useState<{ value: string; label: string }[]>([]);
+    const [cultivationTypes, setCultivationTypes] = React.useState<{ value: string; label: string }[]>([]);
+    const [unitsOfMeasure, setUnitsOfMeasure] = React.useState<{ value: string; label: string }[]>([]);
+    const [farms, setFarms] = React.useState<{ value: string; label: string }[]>([]);
+    const [departments, setDepartments] = React.useState<{ value: string; label: string }[]>([]);
+    const [municipalities, setMunicipalities] = React.useState<{ value: string; label: string }[]>([]);
 
     const [alert, setAlert] = React.useState<{
         type: 'success' | 'error' | 'warning' | 'info';
@@ -130,23 +131,7 @@ export function VenderPage() {
             })[paso],
         [paso]
     );
-    // Categorías[
-    // {
-    //     "id": 1,
-    //     "name": "Granos",
-    //     "parentId": null,
-    //     "subcategories": []
-    // }
-    // 	"cultivationTypes": [
-    // 		{
-    // 			"id": 1,
-    // 			"name": "Convencional"
-    // 		},
-    // 		{
-    // 			"id": 2,
-    // 			"name": "Orgánico"
-    // 		}
-    // 	]
+
     useEffect(() => {
         // Obtener categorías
         api.get('/categories')
@@ -173,9 +158,11 @@ export function VenderPage() {
             .catch((error) => {
                 console.error('Error fetching cultivation types:', error);
             });
+
+        // Obtener unidades de medida
         api.get('/units-of-measure')
             .then(({ data }) => {
-                const unitsOptions = data.units.map((unit: any) => ({
+                const unitsOptions = data.unitsOfMeasure.map((unit: any) => ({
                     value: unit.id.toString(),
                     label: unit.name,
                 }));
@@ -184,23 +171,130 @@ export function VenderPage() {
             .catch((error) => {
                 console.error('Error fetching units of measure:', error);
             });
+
+        // Obtener fincas del usuario
+        api.get('/farms')
+            .then(({ data }) => {
+                const farmOptions = data.farms.map((farm: any) => ({
+                    value: farm.id.toString(),
+                    label: farm.name,
+                }));
+                setFarms(farmOptions);
+            })
+            .catch((error) => {
+                console.error('Error fetching farms:', error);
+            });
+
+        // Obtener departamentos
+        api.get('/locations/departments')
+            .then(({ data }) => {
+                const departmentOptions = data.departments.map((dept: any) => ({
+                    value: dept.id.toString(),
+                    label: dept.name,
+                }));
+                setDepartments(departmentOptions);
+            })
+            .catch((error) => {
+                console.error('Error fetching departments:', error);
+            });
     }, []);
 
+    // Obtener municipios cuando se selecciona un departamento
+    React.useEffect(() => {
+        if (selectedDepartmentId) {
+            api
+                .get(`/locations/municipalities?departmentId=${selectedDepartmentId}`)
+                .then(({ data }) => {
+                    const municipalityOptions = data.municipalities.map((mun: any) => ({
+                        value: mun.id.toString(),
+                        label: mun.name,
+                    }));
+                    setMunicipalities(municipalityOptions);
+                })
+                .catch((error) => {
+                    console.error('Error fetching municipalities:', error);
+                });
+        } else {
+            setMunicipalities([]);
+            setSelectedMunicipalityId('');
+        }
+    }, [selectedDepartmentId]);
+
+    // Función para subir imágenes a Cloudinary
+    const uploadImage = async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'mi_preset_sin_firma'); // Reemplaza con tu preset
+
+        try {
+            const response = await fetch('https://api.cloudinary.com/v1_1/dnwlgvu15/image/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al subir la imagen');
+            }
+
+            const data = await response.json();
+            return data.secure_url;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    };
 
     const handleSubmit = () => {
+        const nationalId = localStorage.getItem('nationalId');
+        console.log('nationalId', nationalId);
         const productData = {
+            nationalId,
             name: nombreProducto,
             categoryId: parseInt(selectedCategoryId, 10),
             cultivationTypeId: parseInt(selectedCultivationTypeId, 10),
-            // ... otros campos
+            description: descripcionProducto,
+            unitOfMeasureId: parseInt(selectedUnitId, 10),
+            stockAvailable: stockDisponible,
+            availableDate: fechaDisponibilidad,
+            priceRanges: rangosPrecios.map((rango) => ({
+                minQuantity: rango.cantidadMinima,
+                unitPrice: rango.precioPorUnidad,
+                totalPrice: rango.precioTotal,
+            })),
+            farmId: crearNuevaFinca ? null : parseInt(fincaSeleccionada, 10),
+            newFarm: crearNuevaFinca
+                ? {
+                    name: nombreFinca,
+                    departmentId: parseInt(selectedDepartmentId, 10),
+                    municipalityId: parseInt(selectedMunicipalityId, 10),
+                    address: direccionExacta,
+                }
+                : null,
+            productPhotos: fotosProducto.map((foto) => ({
+                url: foto.url,
+                photoOrder: foto.photoOrder,
+            })),
         };
 
-        api.post('/products', productData)
+        // Enviar los datos al backend
+        api
+            .post('/products', productData)
             .then((response) => {
                 // Manejar respuesta exitosa
+                setAlert({
+                    type: 'success',
+                    title: 'Producto publicado',
+                    message: 'El producto se ha publicado exitosamente.',
+                });
+                // Resetear el formulario si es necesario
             })
             .catch((error) => {
                 // Manejar errores
+                setAlert({
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Ocurrió un error al publicar el producto.',
+                });
             });
     };
 
@@ -209,7 +303,7 @@ export function VenderPage() {
             {
                 [Paso.InformacionBasica]() {
                     // Validations
-                    if (!nombreProducto.trim() || !categoriaProducto || !tipoCultivo) {
+                    if (!nombreProducto.trim() || !selectedCategoryId || !selectedCultivationTypeId) {
                         setAlert({
                             type: 'error',
                             title: 'Error',
@@ -240,7 +334,7 @@ export function VenderPage() {
                     setPaso([Paso.DisponibilidadYStock, Direction.Next]);
                 },
                 [Paso.DisponibilidadYStock]() {
-                    if (!unidadMedida || !stockDisponible || !fechaDisponibilidad) {
+                    if (!selectedUnitId || !stockDisponible || !fechaDisponibilidad) {
                         setAlert({
                             type: 'error',
                             title: 'Error',
@@ -273,8 +367,8 @@ export function VenderPage() {
                     if (crearNuevaFinca) {
                         if (
                             !nombreFinca.trim() ||
-                            !departamento ||
-                            !ciudad.trim() ||
+                            !selectedDepartmentId ||
+                            !selectedMunicipalityId ||
                             !direccionExacta.trim()
                         ) {
                             setAlert({
@@ -290,52 +384,29 @@ export function VenderPage() {
                 [Paso.RevisionYConfirmacion]() {
                     // Simulate publishing the product
                     setIsLoading(true);
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        setAlert({
-                            type: 'success',
-                            title: 'Producto publicado',
-                            message: 'El producto se ha publicado exitosamente.',
-                        });
-                        // Reset form
-                        setNombreProducto('');
-                        setCategoriaProducto('');
-                        setTipoCultivo('');
-                        setDescripcionProducto('');
-                        setFotosProducto([]);
-                        setUnidadMedida('');
-                        setStockDisponible(undefined);
-                        setFechaDisponibilidad(null);
-                        setRangosPrecios([]);
-                        setCantidadMinima(undefined);
-                        setPrecioPorUnidad(undefined);
-                        setFincaSeleccionada('');
-                        setCrearNuevaFinca(false);
-                        setNombreFinca('');
-                        setDepartamento('');
-                        setCiudad('');
-                        setDireccionExacta('');
-                        setPaso([Paso.InformacionBasica, Direction.Next]);
-                    }, 2000);
+                    handleSubmit();
+                    setIsLoading(false);
+                    // Reset form
+                    // ... resetear los estados si es necesario
                 },
             } as Record<Paso, () => void>
         )[paso]();
     }, [
         paso,
         nombreProducto,
-        categoriaProducto,
-        tipoCultivo,
+        selectedCategoryId,
+        selectedCultivationTypeId,
         descripcionProducto,
         fotosProducto,
-        unidadMedida,
+        selectedUnitId,
         stockDisponible,
         fechaDisponibilidad,
         rangosPrecios,
         fincaSeleccionada,
         crearNuevaFinca,
         nombreFinca,
-        departamento,
-        ciudad,
+        selectedDepartmentId,
+        selectedMunicipalityId,
         direccionExacta,
     ]);
 
@@ -467,11 +538,29 @@ export function VenderPage() {
                                                         });
                                                         return;
                                                     }
-                                                    setFotosProducto([...fotosProducto, ...files]);
+
+                                                    const uploadFiles = async () => {
+                                                        setIsUploading(true);
+                                                        for (const file of files) {
+                                                            try {
+                                                                const url = await uploadImage(file);
+                                                                setFotosProducto((prev) => [...prev, { url, photoOrder: prev.length + 1 }]);
+                                                            } catch (error) {
+                                                                setAlert({
+                                                                    type: 'error',
+                                                                    title: 'Error',
+                                                                    message: 'Error al subir la imagen, por favor intenta de nuevo.',
+                                                                });
+                                                            }
+                                                        }
+                                                        setIsUploading(false);
+                                                    };
+
+                                                    uploadFiles();
                                                 }}
                                                 accept="image/png,image/jpeg"
                                                 multiple
-                                                disabled={fotosProducto.length >= 3}
+                                                disabled={fotosProducto.length >= 3 || isUploading}
                                             >
                                                 {(props) => (
                                                     <Button {...props}>
@@ -481,12 +570,13 @@ export function VenderPage() {
                                                     </Button>
                                                 )}
                                             </FileButton>
+                                            {isUploading && <Text>Cargando imágenes...</Text>}
                                             {fotosProducto.length > 0 && (
                                                 <Group mt="sm">
-                                                    {fotosProducto.map((file, index) => (
+                                                    {fotosProducto.map((foto, index) => (
                                                         <Box key={index} pos="relative">
                                                             <Image
-                                                                src={URL.createObjectURL(file)}
+                                                                src={foto.url}
                                                                 width={100}
                                                                 height={100}
                                                                 withPlaceholder
@@ -499,9 +589,7 @@ export function VenderPage() {
                                                                 top={0}
                                                                 right={0}
                                                                 onClick={() => {
-                                                                    setFotosProducto(
-                                                                        fotosProducto.filter((_, i) => i !== index)
-                                                                    );
+                                                                    setFotosProducto(fotosProducto.filter((_, i) => i !== index));
                                                                 }}
                                                             >
                                                                 <IconTrash size={16} />
@@ -521,9 +609,9 @@ export function VenderPage() {
                                                 label="Unidad de Medida"
                                                 placeholder="Selecciona una unidad"
                                                 required
-                                                data={['Kilo (kg)', 'Unidad', 'Litro (L)', 'Caja']}
-                                                value={unidadMedida}
-                                                onChange={setUnidadMedida}
+                                                data={unitsOfMeasure}
+                                                value={selectedUnitId}
+                                                onChange={(value) => setSelectedUnitId(value)}
                                             />
                                             <NumberInput
                                                 label="Stock Disponible"
@@ -534,10 +622,11 @@ export function VenderPage() {
                                                 onChange={(value) => setStockDisponible(value)}
                                             />
                                             <DateInput
+                                                label="Fecha de Disponibilidad"
+                                                placeholder="Selecciona la fecha de disponibilidad"
+                                                required
                                                 value={fechaDisponibilidad}
-                                                onChange={(date) => setFechaDisponibilidad(date)}
-                                                label="Date input"
-                                                placeholder="Date input"
+                                                onChange={(value) => setFechaDisponibilidad(value)}
                                             />
                                         </>
                                     ),
@@ -573,8 +662,7 @@ export function VenderPage() {
                                                         });
                                                         return;
                                                     }
-                                                    const precioTotalCalc =
-                                                        (cantidadMinima || 0) * (precioPorUnidad || 0);
+                                                    const precioTotalCalc = (cantidadMinima || 0) * (precioPorUnidad || 0);
                                                     setRangosPrecios([
                                                         ...rangosPrecios,
                                                         {
@@ -597,17 +685,15 @@ export function VenderPage() {
                                                     {rangosPrecios.map((rango, index) => (
                                                         <Group key={index} position="apart">
                                                             <Text>
-                                                                Cantidad Mínima: {rango.cantidadMinima}, Precio por
-                                                                Unidad: {rango.precioPorUnidad.toFixed(2)}, Precio Total:{' '}
+                                                                Cantidad Mínima: {rango.cantidadMinima}, Precio por Unidad:{' '}
+                                                                {rango.precioPorUnidad.toFixed(2)}, Precio Total:{' '}
                                                                 {rango.precioTotal.toFixed(2)}
                                                             </Text>
                                                             <Button
                                                                 variant="subtle"
                                                                 color="red"
                                                                 onClick={() => {
-                                                                    setRangosPrecios(
-                                                                        rangosPrecios.filter((_, i) => i !== index)
-                                                                    );
+                                                                    setRangosPrecios(rangosPrecios.filter((_, i) => i !== index));
                                                                 }}
                                                             >
                                                                 <IconTrash size={16} />
@@ -626,17 +712,15 @@ export function VenderPage() {
                                             <Select
                                                 label="Seleccionar Finca Existente"
                                                 placeholder="Selecciona una finca"
-                                                data={['Finca 1', 'Finca 2']}
+                                                data={farms}
                                                 value={fincaSeleccionada}
-                                                onChange={setFincaSeleccionada}
+                                                onChange={(value) => setFincaSeleccionada(value)}
                                                 disabled={crearNuevaFinca}
                                             />
                                             <Checkbox
                                                 label="Crear Nueva Finca"
                                                 checked={crearNuevaFinca}
-                                                onChange={(event) =>
-                                                    setCrearNuevaFinca(event.currentTarget.checked)
-                                                }
+                                                onChange={(event) => setCrearNuevaFinca(event.currentTarget.checked)}
                                             />
                                             {crearNuevaFinca && (
                                                 <>
@@ -651,17 +735,22 @@ export function VenderPage() {
                                                         label="Departamento"
                                                         placeholder="Selecciona el departamento"
                                                         required
-                                                        data={['Departamento 1', 'Departamento 2']}
-                                                        value={departamento}
-                                                        onChange={setDepartamento}
+                                                        data={departments}
+                                                        value={selectedDepartmentId}
+                                                        onChange={(value) => {
+                                                            setSelectedDepartmentId(value);
+                                                            setSelectedMunicipalityId('');
+                                                        }}
                                                     />
-                                                    <Input.Wrapper label="Ciudad" required>
-                                                        <Input
-                                                            value={ciudad}
-                                                            onChange={(e) => setCiudad(e.target.value)}
-                                                            maxLength={100}
-                                                        />
-                                                    </Input.Wrapper>
+                                                    <Select
+                                                        label="Municipio"
+                                                        placeholder="Selecciona el municipio"
+                                                        required
+                                                        data={municipalities}
+                                                        value={selectedMunicipalityId}
+                                                        onChange={(value) => setSelectedMunicipalityId(value)}
+                                                        disabled={!selectedDepartmentId}
+                                                    />
                                                     <Input.Wrapper label="Dirección Exacta" required>
                                                         <Input
                                                             value={direccionExacta}
@@ -682,20 +771,22 @@ export function VenderPage() {
                                                 <strong>Nombre del Producto:</strong> {nombreProducto}
                                             </Text>
                                             <Text>
-                                                <strong>Categoría:</strong> {categoriaProducto}
+                                                <strong>Categoría:</strong>{' '}
+                                                {categories.find((cat) => cat.value === selectedCategoryId)?.label}
                                             </Text>
                                             <Text>
-                                                <strong>Tipo de Cultivo:</strong> {tipoCultivo}
+                                                <strong>Tipo de Cultivo:</strong>{' '}
+                                                {cultivationTypes.find((type) => type.value === selectedCultivationTypeId)?.label}
                                             </Text>
                                             <Text>
                                                 <strong>Descripción:</strong> {descripcionProducto}
                                             </Text>
                                             {fotosProducto.length > 0 && (
                                                 <Group mt="sm">
-                                                    {fotosProducto.map((file, index) => (
+                                                    {fotosProducto.map((foto, index) => (
                                                         <Image
                                                             key={index}
-                                                            src={URL.createObjectURL(file)}
+                                                            src={foto.url}
                                                             width={100}
                                                             height={100}
                                                             withPlaceholder
@@ -704,7 +795,8 @@ export function VenderPage() {
                                                 </Group>
                                             )}
                                             <Text>
-                                                <strong>Unidad de Medida:</strong> {unidadMedida}
+                                                <strong>Unidad de Medida:</strong>{' '}
+                                                {unitsOfMeasure.find((unit) => unit.value === selectedUnitId)?.label}
                                             </Text>
                                             <Text>
                                                 <strong>Stock Disponible:</strong> {stockDisponible}
@@ -726,8 +818,12 @@ export function VenderPage() {
                                             <Text>
                                                 <strong>Finca Seleccionada:</strong>{' '}
                                                 {crearNuevaFinca
-                                                    ? `Nueva Finca: ${nombreFinca}, ${departamento}, ${ciudad}, ${direccionExacta}`
-                                                    : fincaSeleccionada}
+                                                    ? `Nueva Finca: ${nombreFinca}, ${
+                                                        departments.find((dept) => dept.value === selectedDepartmentId)?.label
+                                                    }, ${
+                                                        municipalities.find((mun) => mun.value === selectedMunicipalityId)?.label
+                                                    }, ${direccionExacta}`
+                                                    : farms.find((farm) => farm.value === fincaSeleccionada)?.label}
                                             </Text>
                                         </>
                                     ),
@@ -742,7 +838,8 @@ export function VenderPage() {
                         onClick={() => {
                             nextButtonAction();
                         }}
-                        loading={isLoading}
+                        loading={isLoading || isUploading}
+                        disabled={isUploading}
                     >
                         {nextButtonText}
                     </Button>

@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { IconShoppingCart } from '@tabler/icons-react';
 import { CartContext } from '@/contexts/CartContext';
 import { Carousel } from '@mantine/carousel';
+import '@mantine/carousel/styles.css';
 
 interface PriceRange {
     id: number;
@@ -139,7 +140,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         // Cerrar el modal
         setModalOpened(false);
     };
-
     return (
         <>
             <Card
@@ -147,15 +147,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 padding="lg"
                 radius="md"
                 withBorder
-                onClick={handleCardClick}
-                style={{ cursor: 'pointer' }}
+                // onClick={handleCardClick}
+                // style={{ cursor: 'pointer' }}
             >
                 {/* Sección de imágenes */}
                 <Card.Section>
                     {product.productPhotos.length > 1 ? (
-                        <Carousel withIndicators loop>
+                        <Carousel withIndicators height={242}>
                             {product.productPhotos.map((photo) => (
-                                <Image key={photo.id} src={photo.url} height={160} alt={product.name} />
+                                <Carousel.Slide key={photo.id}>
+                                    <Image key={photo.id} src={photo.url} height={160} alt={product.name} />
+                                </Carousel.Slide>
+
                             ))}
                         </Carousel>
                     ) : (
