@@ -172,13 +172,14 @@ export const HomePage: React.FC = () => {
             <RegisterButton />
 
             {/* Imagen del agricultor solo para ESCRITORIO */}
-            {/*<div className="absolute bottom-0 right-0 mb-8 mr-8 hidden md:block" style={{ marginRight: '-20rem' }}>*/}
-            {/*  <img*/}
-            {/*    src="/farmer-illustration.png"*/}
-            {/*    alt="Agricultor"*/}
-            {/*    className="w-80 md:w-[50rem] h-auto animate-fadeIn"*/}
-            {/*  />*/}
-            {/*</div>*/}
+            <div className="absolute bottom-0 right-0 mb-8 mr-8 hidden md:block" style={{ marginRight: '-20rem' }}>
+              <img
+                src="/farmer-illustration.png"
+                alt="Agricultor"
+                className="w-80 md:w-[50rem] h-auto animate-fadeIn"
+                style={{maxHeight: '40rem'}}
+              />
+            </div>
           </div>
 
           {/* Sección para MÓVIL */}

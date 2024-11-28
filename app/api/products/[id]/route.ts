@@ -22,6 +22,9 @@ export const GET = async (
                 priceRanges: true,
                 productPhotos: true,
             },
+            orderBy: {
+                createdAt: 'desc',
+            }
         });
 
         if (!product) {

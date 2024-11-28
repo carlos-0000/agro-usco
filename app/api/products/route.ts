@@ -131,6 +131,9 @@ export const GET = async (req: NextRequest) => {
                 priceRanges: true,
                 productPhotos: true,
             },
+            orderBy: {
+            createdAt: 'desc',
+        },
         });
         return NextResponse.json({ products });
     } catch (error) {
