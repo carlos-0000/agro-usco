@@ -10,14 +10,16 @@ import {
     Group,
     Stack,
     Modal,
-    Carousel,
     NumberInput,
     Table,
     Divider,
 } from '@mantine/core';
+
+
 import { useRouter } from 'next/navigation';
 import { IconShoppingCart } from '@tabler/icons-react';
 import { CartContext } from '@/contexts/CartContext';
+import { Carousel } from '@mantine/carousel';
 
 interface PriceRange {
     id: number;

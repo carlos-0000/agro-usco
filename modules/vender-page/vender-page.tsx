@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useRouter as useNavigation } from 'next/navigation';
 import {
     IconAlertCircle,
@@ -33,6 +33,7 @@ import {
 } from '@mantine/core';
 import {DateInput, DatePickerInput} from '@mantine/dates';
 import classes from './vender-page.module.css';
+import {api} from "@/lib/api";
 
 enum Paso {
     InformacionBasica,
@@ -55,6 +56,8 @@ const variants = {
 };
 
 export function VenderPage() {
+
+
     const navigation = useNavigation();
 
     const [[paso, direction], setPaso] = React.useState<[Paso, Direction]>([
@@ -90,6 +93,15 @@ export function VenderPage() {
     const [ciudad, setCiudad] = React.useState('');
     const [direccionExacta, setDireccionExacta] = React.useState('');
 
+    const [categories, setCategories] = React.useState<{ value: string; label: string }[]>([]);
+    const [cultivationTypes, setCultivationTypes] = React.useState<{ value: string; label: string }[]>([]);
+    const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>('');
+    const [selectedCultivationTypeId, setSelectedCultivationTypeId] = React.useState<string>('');
+
+    // Estado para unidades de medida
+    const [unitsOfMeasure, setUnitsOfMeasure] = React.useState<{ value: string; label: string }[]>([]);
+    const [selectedUnitId, setSelectedUnitId] = React.useState<string>('');
+
     const [alert, setAlert] = React.useState<{
         type: 'success' | 'error' | 'warning' | 'info';
         title: string;
@@ -118,6 +130,79 @@ export function VenderPage() {
             })[paso],
         [paso]
     );
+    // Categorías[
+    // {
+    //     "id": 1,
+    //     "name": "Granos",
+    //     "parentId": null,
+    //     "subcategories": []
+    // }
+    // 	"cultivationTypes": [
+    // 		{
+    // 			"id": 1,
+    // 			"name": "Convencional"
+    // 		},
+    // 		{
+    // 			"id": 2,
+    // 			"name": "Orgánico"
+    // 		}
+    // 	]
+    useEffect(() => {
+        // Obtener categorías
+        api.get('/categories')
+            .then(({ data }) => {
+                const categoryOptions = data.categories.map((category: any) => ({
+                    value: category.id.toString(),
+                    label: category.name,
+                }));
+                setCategories(categoryOptions);
+            })
+            .catch((error) => {
+                console.error('Error fetching categories:', error);
+            });
+
+        // Obtener tipos de cultivo
+        api.get('/cultivation-types')
+            .then(({ data }) => {
+                const cultivationTypeOptions = data.cultivationTypes.map((type: any) => ({
+                    value: type.id.toString(),
+                    label: type.name,
+                }));
+                setCultivationTypes(cultivationTypeOptions);
+            })
+            .catch((error) => {
+                console.error('Error fetching cultivation types:', error);
+            });
+        api.get('/units-of-measure')
+            .then(({ data }) => {
+                const unitsOptions = data.units.map((unit: any) => ({
+                    value: unit.id.toString(),
+                    label: unit.name,
+                }));
+                setUnitsOfMeasure(unitsOptions);
+            })
+            .catch((error) => {
+                console.error('Error fetching units of measure:', error);
+            });
+    }, []);
+
+
+    const handleSubmit = () => {
+        const productData = {
+            name: nombreProducto,
+            categoryId: parseInt(selectedCategoryId, 10),
+            cultivationTypeId: parseInt(selectedCultivationTypeId, 10),
+            // ... otros campos
+        };
+
+        api.post('/products', productData)
+            .then((response) => {
+                // Manejar respuesta exitosa
+            })
+            .catch((error) => {
+                // Manejar errores
+            });
+    };
 
     const nextButtonAction = React.useCallback(() => {
         (
@@ -343,17 +428,17 @@ export function VenderPage() {
                                                 label="Categoría del Producto"
                                                 placeholder="Selecciona una categoría"
                                                 required
-                                                data={['Granos', 'Frutas', 'Verduras']}
-                                                value={categoriaProducto}
-                                                onChange={setCategoriaProducto}
+                                                data={categories}
+                                                value={selectedCategoryId}
+                                                onChange={(value) => setSelectedCategoryId(value)}
                                             />
                                             <Select
                                                 label="Tipo de Cultivo"
                                                 placeholder="Selecciona el tipo de cultivo"
                                                 required
-                                                data={['Convencional', 'Orgánico']}
-                                                value={tipoCultivo}
-                                                onChange={setTipoCultivo}
+                                                data={cultivationTypes}
+                                                value={selectedCultivationTypeId}
+                                                onChange={(value) => setSelectedCultivationTypeId(value)}
                                             />
                                         </>
                                     ),
