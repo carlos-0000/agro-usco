@@ -79,7 +79,7 @@ AUTH_SECRET="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 ## Contribución
 
-El desarrollo sigue la metodología Scrum con despliegues continuos. Si deseas contribuir, por favor:
+### El desarrollo sigue la metodología Scrum con despliegues continuos. Si deseas contribuir, por favor:
 	1.	Crea una rama a partir de dev para tus cambios.
 	2.	Realiza un pull request a la rama dev para revisión.
 	3.	Sigue las guías de estilo y buenas prácticas definidas en los linters y configuraciones de Prettier.
