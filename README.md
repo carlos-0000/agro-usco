@@ -54,17 +54,17 @@ AUTH_SECRET="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 	•	Almacenamiento optimizado de imágenes en Cloudinary para publicaciones y productos.
 	•	Alta optimización para dispositivos móviles, con énfasis en usabilidad.
 
-# Scripts disponibles
+## Scripts disponibles
 
-# Ejecuta los siguientes scripts para trabajar con el proyecto:
+## Ejecuta los siguientes scripts para trabajar con el proyecto:
 
-# Desarrollo y construcción
+## Desarrollo y construcción
 
 	•	dev: Inicia el servidor en modo desarrollo.
 	•	build: Genera el proyecto para producción.
 	•	analyze: Analiza el tamaño de los paquetes generados.
 
-# Pruebas y calidad de código
+## Pruebas y calidad de código
 
 	•	typecheck: Verifica los tipos en TypeScript.
 	•	lint: Ejecuta ESLint.
@@ -72,14 +72,14 @@ AUTH_SECRET="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 	•	jest: Ejecuta las pruebas con Jest.
 	•	test: Ejecuta todas las verificaciones (jest, prettier:check, lint, typecheck).
 
-# Storybook
+## Storybook
 
 	•	storybook: Inicia el servidor de Storybook para componentes.
 	•	storybook:build: Genera una versión estática de Storybook.
 
-# Contribución
+## Contribución
 
-# El desarrollo sigue la metodología Scrum con despliegues continuos. Si deseas contribuir, por favor:
+El desarrollo sigue la metodología Scrum con despliegues continuos. Si deseas contribuir, por favor:
 	1.	Crea una rama a partir de dev para tus cambios.
 	2.	Realiza un pull request a la rama dev para revisión.
 	3.	Sigue las guías de estilo y buenas prácticas definidas en los linters y configuraciones de Prettier.
